@@ -5,13 +5,13 @@
 ### Backend
 ```bash
 cd backend
-npm install
+pnpm install
 ```
 
 ### Frontend
 ```bash
 cd frontend
-npm install
+pnpm install
 ```
 
 ## Настройка shadcn/ui
@@ -62,8 +62,8 @@ docker-compose up -d
 
 ```bash
 cd backend
-npx prisma generate
-npx prisma db push
+pnpm exec prisma generate
+pnpm exec prisma db push
 ```
 
 ## Запуск проекта
@@ -71,13 +71,13 @@ npx prisma db push
 ### Backend (терминал 1)
 ```bash
 cd backend
-npm run dev
+pnpm run dev
 ```
 
 ### Frontend (терминал 2)
 ```bash
 cd frontend
-npm run dev
+pnpm run dev
 ```
 
 ## Полезные команды
@@ -85,16 +85,16 @@ npm run dev
 ### Prisma
 ```bash
 cd backend
-npm run db:studio  # Открыть Prisma Studio
-npm run db:migrate # Создать миграцию
-npm run db:push    # Применить изменения схемы
+pnpm run db:studio  # Открыть Prisma Studio
+pnpm run db:migrate # Создать миграцию
+pnpm run db:push    # Применить изменения схемы
 ```
 
 ### Frontend
 ```bash
 cd frontend
-npm run build      # Сборка для production
-npm run start      # Запуск production версии
+pnpm run build      # Сборка для production
+pnpm run start      # Запуск production версии
 ```
 
 ## ISR (Incremental Static Regeneration)

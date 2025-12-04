@@ -26,8 +26,8 @@
 
 ### Требования
 - Node.js 20+
+- pnpm (рекомендуется) или npm/yarn
 - Docker и Docker Compose (для PostgreSQL)
-- npm или yarn
 
 ### Установка
 
@@ -41,25 +41,25 @@ docker-compose up -d
 3. **Настрой Backend:**
 ```bash
 cd backend
-npm install
+pnpm install
 cp .env.example .env  # и заполни переменные
-npx prisma generate
-npx prisma db push
-npm run dev
+pnpm exec prisma generate
+pnpm exec prisma db push
+pnpm run dev
 ```
 
 4. **Настрой Frontend:**
 ```bash
 cd frontend
-npm install
+pnpm install
 cp .env.example .env  # и заполни переменные
-npm run dev
+pnpm run dev
 ```
 
 5. **Открой браузер:**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
-- Prisma Studio: `cd backend && npm run db:studio`
+- Prisma Studio: `cd backend && pnpm run db:studio`
 
 ## 📁 Структура проекта
 
