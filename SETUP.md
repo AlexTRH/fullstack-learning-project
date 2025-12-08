@@ -123,5 +123,3 @@ frontend/
   stores/           # Zustand stores
   hooks/             # Custom React hooks (создай при необходимости)
 ```
-
-
