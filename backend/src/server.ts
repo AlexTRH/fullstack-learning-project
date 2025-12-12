@@ -30,10 +30,16 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes (будем добавлять позже)
+// API routes
 app.get('/api', (req, res) => {
   res.json({ message: 'API is running' });
 });
+
+// Import routes
+import authRoutes from './routes/authRoutes.js';
+
+// Use routes
+app.use('/api/auth', authRoutes);
 
 // Error handling
 app.use(notFound);
@@ -42,5 +48,3 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-
