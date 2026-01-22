@@ -37,14 +37,27 @@ app.get('/api', (req, res) => {
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+app
+  .listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  })
+  .on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use.`);
+      console.error(`💡 Try: kill -9 $(lsof -ti:${PORT})`);
+      console.error(`💡 Or change PORT in .env file`);
+      process.exit(1);
+    } else {
+      throw err;
+    }
+  });

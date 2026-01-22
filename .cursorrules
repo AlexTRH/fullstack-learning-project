@@ -1,0 +1,322 @@
+# Cursor Rules for Fullstack Learning Project
+
+## Project Overview
+This is a fullstack social media application built with:
+- **Backend**: Node.js + Express + TypeScript + Prisma + PostgreSQL
+- **Frontend**: Next.js 16 (App Router) + TypeScript + TanStack Query + Zustand + shadcn/ui
+- **Package Manager**: pnpm
+- **Architecture**: Monorepo structure
+
+## General Principles
+
+### Code Quality
+- Always use TypeScript with strict mode enabled
+- Prefer explicit types over `any` - use `unknown` if type is truly unknown
+- Use meaningful variable and function names
+- Keep functions small and focused (single responsibility)
+- Write self-documenting code with clear naming
+- Add JSDoc comments for public APIs and complex logic
+
+### Error Handling
+- Always use try-catch blocks for async operations
+- Use custom AppError class for operational errors
+- Never expose internal error details in production
+- Return consistent error response format: `{ success: boolean, message: string }`
+- Log errors with context (userId, requestId, etc.)
+
+### Security
+- Never commit `.env` files or secrets
+- Always validate and sanitize user input
+- Use parameterized queries (Prisma handles this)
+- Implement rate limiting for auth endpoints
+- Use HTTPS in production
+- Validate JWT tokens on every protected route
+- Hash passwords with bcrypt (minimum 10 rounds)
+
+## Backend Rules
+
+### Structure
+```
+backend/
+├── src/
+│   ├── controllers/    # Request handlers (business logic)
+│   ├── routes/         # Route definitions
+│   ├── middleware/     # Express middleware
+│   ├── utils/          # Utility functions
+│   ├── validators/     # Zod schemas
+│   ├── lib/            # Third-party libs (Prisma, etc.)
+│   └── server.ts       # Entry point
+└── prisma/
+    └── schema.prisma   # Database schema
+```
+
+### Express Best Practices
+- Use async/await, never use callbacks
+- Always use `next()` in middleware to pass errors to error handler
+- Use `express.json()` and `express.urlencoded()` for body parsing
+- Implement CORS properly with credentials support
+- Use Helmet for security headers
+- Use compression middleware for production
+
+### Controllers
+- Controllers should be thin - delegate business logic to services if needed
+- Always use `async (req, res, next)` signature
+- Use `next(error)` to pass errors to error handler
+- Return consistent response format: `{ success: boolean, data?: T, message?: string }`
+- Use `AuthRequest` type for authenticated routes (extends Request with userId)
+
+### Validation
+- Always validate input with Zod schemas
+- Use `validate()` middleware before controllers
+- Validate: email format, password strength, string lengths, required fields
+- Return clear validation error messages
+
+### Database (Prisma)
+- Always use Prisma Client from `lib/prisma.ts` (singleton)
+- Use transactions for multi-step operations
+- Use `select` to fetch only needed fields
+- Use `include` for relations, but be mindful of N+1 queries
+- Always handle unique constraint violations (email, username)
+- Use soft deletes with `isDeleted` flag when appropriate
+- Add indexes for frequently queried fields
+- Use `onDelete: Cascade` for cascading deletes
+
+### Authentication & Authorization
+- Use JWT with access tokens (15m) and refresh tokens (30d)
+- Store refresh tokens in database
+- Always verify tokens in `authenticate` middleware
+- Use `authenticate` middleware for protected routes
+- Check user permissions for admin/moderator actions
+- Invalidate refresh tokens on logout
+
+### API Design
+- Use RESTful conventions: GET (read), POST (create), PUT (update), DELETE (delete)
+- Use plural nouns for resources: `/api/posts`, `/api/users`
+- Use nested resources for relations: `/api/posts/:id/comments`
+- Implement pagination for list endpoints: `?page=1&limit=20`
+- Use query parameters for filtering and sorting
+- Return appropriate HTTP status codes:
+  - 200: Success
+  - 201: Created
+  - 400: Bad Request (validation errors)
+  - 401: Unauthorized (missing/invalid token)
+  - 403: Forbidden (no permission)
+  - 404: Not Found
+  - 409: Conflict (duplicate resource)
+  - 500: Internal Server Error
+
+## Frontend Rules
+
+### Structure
+```
+frontend/
+├── app/                # Next.js App Router pages
+├── components/         # React components
+│   └── ui/            # shadcn/ui components
+├── lib/               # Utilities, API client, query client
+├── stores/            # Zustand stores
+├── hooks/             # Custom React hooks
+└── types/              # TypeScript types
+```
+
+### Next.js Best Practices
+- Use App Router (not Pages Router)
+- Use Server Components by default, mark Client Components with `"use client"`
+- Use `async` Server Components for data fetching
+- Implement ISR (Incremental Static Regeneration) where appropriate
+- Use `revalidate` for ISR: `export const revalidate = 60`
+- Use `next/image` for images, `next/link` for navigation
+- Never use `useEffect` for data fetching - use Server Components or TanStack Query
+
+### React Patterns
+- Use functional components with hooks
+- Extract reusable logic into custom hooks
+- Use `useMemo` and `useCallback` sparingly (only when needed)
+- Keep components small and focused
+- Use composition over inheritance
+- Prefer controlled components for forms
+
+### State Management
+- **Zustand**: For global client state (auth, UI state)
+- **TanStack Query**: For server state (API data, caching)
+- **React State**: For local component state
+- Never duplicate server state in Zustand - use TanStack Query cache
+
+### Data Fetching
+- Use TanStack Query for all API calls
+- Create custom hooks: `usePosts()`, `useUser(id)`, etc.
+- Use `useQuery` for GET requests
+- Use `useMutation` for POST/PUT/DELETE
+- Implement optimistic updates where appropriate
+- Handle loading and error states properly
+- Use `staleTime` and `cacheTime` appropriately
+
+### Forms
+- Use React Hook Form for form management
+- Use Zod for form validation (shared with backend)
+- Use `@hookform/resolvers/zod` for integration
+- Show validation errors inline
+- Disable submit button during submission
+
+### API Client
+- Use Axios instance from `lib/api.ts`
+- Add request interceptors for auth tokens
+- Add response interceptors for error handling
+- Use TypeScript types for request/response
+- Handle 401 errors (redirect to login)
+
+### Styling
+- Use Tailwind CSS utility classes
+- Use shadcn/ui components (don't write custom UI from scratch)
+- Use `cn()` utility for conditional classes
+- Follow mobile-first responsive design
+- Use CSS variables for theming (dark mode support)
+
+### TypeScript
+- Define types in `types/` directory
+- Share types between frontend/backend when possible
+- Use `interface` for object shapes, `type` for unions/intersections
+- Never use `any` - use `unknown` and type guards
+- Use discriminated unions for state management
+
+## Database Schema Rules
+
+### Prisma Schema
+- Use `@id @default(uuid())` for primary keys
+- Use `@unique` for unique fields (email, username)
+- Use `@default(now())` for timestamps
+- Use `@updatedAt` for auto-updated timestamps
+- Use enums for fixed sets of values
+- Add `@@index` for frequently queried fields
+- Use `onDelete: Cascade` for dependent records
+- Use `@@map("table_name")` for custom table names
+
+### Migrations
+- Always use `prisma migrate dev` for schema changes
+- Never edit migration files manually
+- Always test migrations on development first
+- Use `prisma db push` only for prototyping
+
+## Git & Commits
+
+### Commit Messages
+- Use conventional commits format:
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `refactor:` for code refactoring
+  - `docs:` for documentation
+  - `style:` for formatting
+  - `test:` for tests
+- Be descriptive but concise
+- Example: `feat(auth): add refresh token endpoint`
+
+### Branching
+- Use `main` for production-ready code
+- Create feature branches: `feature/user-profile`
+- Create fix branches: `fix/auth-token-expiry`
+
+## Code Review Checklist
+
+Before submitting code:
+- [ ] TypeScript compiles without errors
+- [ ] No `any` types (unless absolutely necessary)
+- [ ] All API endpoints have validation
+- [ ] Error handling is implemented
+- [ ] Database queries are optimized (no N+1)
+- [ ] Authentication is checked on protected routes
+- [ ] Environment variables are not hardcoded
+- [ ] Code is formatted with Prettier
+- [ ] No console.logs in production code (use proper logging)
+
+## Performance
+
+### Backend
+- Use database indexes for frequently queried fields
+- Implement pagination for list endpoints
+- Use `select` to fetch only needed fields
+- Cache expensive operations (Redis if needed)
+- Use connection pooling (Prisma handles this)
+
+### Frontend
+- Use Next.js Image component for images
+- Implement code splitting with dynamic imports
+- Use ISR for static content that updates occasionally
+- Optimize bundle size (check with `next build --analyze`)
+- Use React.memo for expensive components (sparingly)
+
+## Testing (Future)
+- Write unit tests for utilities and helpers
+- Write integration tests for API endpoints
+- Write E2E tests for critical user flows
+- Aim for >70% code coverage
+
+## Documentation
+- Document complex business logic
+- Add JSDoc comments for public APIs
+- Keep README.md updated
+- Document environment variables in .env.example
+
+## When Writing Code
+
+1. **Think before coding**: Understand the requirement fully
+2. **Follow existing patterns**: Match the style of existing code
+3. **Keep it simple**: Don't over-engineer
+4. **Test manually**: Verify the code works before committing
+5. **Consider edge cases**: Handle errors and edge cases
+6. **Be consistent**: Follow the patterns established in the codebase
+
+## Common Patterns
+
+### Backend Controller Pattern
+```typescript
+export const controller = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validation happens in middleware
+    // Business logic here
+    const result = await prisma.model.findMany();
+    res.json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+```
+
+### Frontend Query Hook Pattern
+```typescript
+export const usePosts = () => {
+  return useQuery({
+    queryKey: ['posts'],
+    queryFn: () => api.get('/api/posts').then(res => res.data.data),
+  });
+};
+```
+
+### Frontend Mutation Pattern
+```typescript
+export const useCreatePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post('/api/posts', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+};
+```
+
+## Never Do
+
+- ❌ Don't use `any` type
+- ❌ Don't commit `.env` files
+- ❌ Don't expose sensitive data in API responses
+- ❌ Don't use `eval()` or `Function()` constructor
+- ❌ Don't store passwords in plain text
+- ❌ Don't trust client-side validation alone
+- ❌ Don't use `console.log` in production
+- ❌ Don't ignore TypeScript errors
+- ❌ Don't skip error handling
+- ❌ Don't create circular dependencies

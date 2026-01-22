@@ -1,3 +1,4 @@
+// @ts-ignore - bcryptjs default export works at runtime
 import bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;
