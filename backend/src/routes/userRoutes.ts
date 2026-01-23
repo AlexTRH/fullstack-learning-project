@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getMe } from '../controllers/userController.js';
 import { authenticate } from '../middleware/auth.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Шаг 1: GET /api/users/me - получить свой профиль
 // Требует аутентификации (middleware authenticate)
