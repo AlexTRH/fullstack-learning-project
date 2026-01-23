@@ -1,7 +1,9 @@
 # Cursor Rules for Fullstack Learning Project
 
 ## Project Overview
+
 This is a fullstack social media application built with:
+
 - **Backend**: Node.js + Express + TypeScript + Prisma + PostgreSQL
 - **Frontend**: Next.js 16 (App Router) + TypeScript + TanStack Query + Zustand + shadcn/ui
 - **Package Manager**: pnpm
@@ -10,6 +12,7 @@ This is a fullstack social media application built with:
 ## General Principles
 
 ### Code Quality
+
 - Always use TypeScript with strict mode enabled
 - Prefer explicit types over `any` - use `unknown` if type is truly unknown
 - Use meaningful variable and function names
@@ -18,6 +21,7 @@ This is a fullstack social media application built with:
 - Add JSDoc comments for public APIs and complex logic
 
 ### Error Handling
+
 - Always use try-catch blocks for async operations
 - Use custom AppError class for operational errors
 - Never expose internal error details in production
@@ -25,6 +29,7 @@ This is a fullstack social media application built with:
 - Log errors with context (userId, requestId, etc.)
 
 ### Security
+
 - Never commit `.env` files or secrets
 - Always validate and sanitize user input
 - Use parameterized queries (Prisma handles this)
@@ -36,6 +41,7 @@ This is a fullstack social media application built with:
 ## Backend Rules
 
 ### Structure
+
 ```
 backend/
 ├── src/
@@ -51,6 +57,7 @@ backend/
 ```
 
 ### Express Best Practices
+
 - Use async/await, never use callbacks
 - Always use `next()` in middleware to pass errors to error handler
 - Use `express.json()` and `express.urlencoded()` for body parsing
@@ -58,21 +65,63 @@ backend/
 - Use Helmet for security headers
 - Use compression middleware for production
 
-### Controllers
-- Controllers should be thin - delegate business logic to services if needed
+### Controllers (Presentation Layer)
+
+- Controllers are **thin** - only handle HTTP concerns
+- **Never** put business logic in controllers - delegate to use cases
 - Always use `async (req, res, next)` signature
 - Use `next(error)` to pass errors to error handler
 - Return consistent response format: `{ success: boolean, data?: T, message?: string }`
 - Use `AuthRequest` type for authenticated routes (extends Request with userId)
+- Import use cases from `application/use-cases/`
+- Import dependencies from `infrastructure/dependencies.ts`
 
-### Validation
-- Always validate input with Zod schemas
+### Validation (Presentation Layer)
+
+- Always validate input with Zod schemas in `presentation/validators/`
 - Use `validate()` middleware before controllers
 - Validate: email format, password strength, string lengths, required fields
 - Return clear validation error messages
+- Validation schemas are in `presentation/validators/`
+
+### Use Cases (Application Layer)
+
+- **All business logic goes in use cases**, not controllers
+- Use cases are pure functions that take input and dependencies
+- Dependencies are injected (from `infrastructure/dependencies.ts`)
+- Use cases should be testable in isolation
+- One use case = one business operation
+- Use cases call domain interfaces, not infrastructure directly
+- Example structure:
+
+  ```typescript
+  export async function useCaseName(
+    input: UseCaseInput,
+    dependencies: { repository: Repository; service: Service }
+  ): Promise<UseCaseOutput> {
+    // Business logic here
+  }
+  ```
+
+### Domain Layer
+
+- **Entities**: Pure TypeScript interfaces/types representing business concepts
+- **Interfaces**: Contracts for repositories and services (no implementations)
+- Domain layer has **zero dependencies** on infrastructure or frameworks
+- Domain entities should not have database-specific fields
+
+### Infrastructure Layer
+
+- **Repositories**: Implement domain repository interfaces using Prisma
+- **Services**: Implement domain service interfaces (JWT, bcrypt, etc.)
+- **Dependencies**: Centralized dependency injection in `dependencies.ts`
+- All infrastructure implementations are created via factory functions
+- Example: `createPrismaUserRepository(prisma)` returns `UserRepository`
 
 ### Database (Prisma)
-- Always use Prisma Client from `lib/prisma.ts` (singleton)
+
+- Always use Prisma Client from `infrastructure/database/prisma.ts` (singleton)
+- Repositories are in `infrastructure/database/`
 - Use transactions for multi-step operations
 - Use `select` to fetch only needed fields
 - Use `include` for relations, but be mindful of N+1 queries
@@ -80,8 +129,10 @@ backend/
 - Use soft deletes with `isDeleted` flag when appropriate
 - Add indexes for frequently queried fields
 - Use `onDelete: Cascade` for cascading deletes
+- Map Prisma models to domain entities in repositories
 
 ### Authentication & Authorization
+
 - Use JWT with access tokens (15m) and refresh tokens (30d)
 - Store refresh tokens in database
 - Always verify tokens in `authenticate` middleware
@@ -90,6 +141,7 @@ backend/
 - Invalidate refresh tokens on logout
 
 ### API Design
+
 - Use RESTful conventions: GET (read), POST (create), PUT (update), DELETE (delete)
 - Use plural nouns for resources: `/api/posts`, `/api/users`
 - Use nested resources for relations: `/api/posts/:id/comments`
@@ -108,6 +160,7 @@ backend/
 ## Frontend Rules
 
 ### Structure
+
 ```
 frontend/
 ├── app/                # Next.js App Router pages
@@ -120,6 +173,7 @@ frontend/
 ```
 
 ### Next.js Best Practices
+
 - Use App Router (not Pages Router)
 - Use Server Components by default, mark Client Components with `"use client"`
 - Use `async` Server Components for data fetching
@@ -129,6 +183,7 @@ frontend/
 - Never use `useEffect` for data fetching - use Server Components or TanStack Query
 
 ### React Patterns
+
 - Use functional components with hooks
 - Extract reusable logic into custom hooks
 - Use `useMemo` and `useCallback` sparingly (only when needed)
@@ -137,12 +192,14 @@ frontend/
 - Prefer controlled components for forms
 
 ### State Management
+
 - **Zustand**: For global client state (auth, UI state)
 - **TanStack Query**: For server state (API data, caching)
 - **React State**: For local component state
 - Never duplicate server state in Zustand - use TanStack Query cache
 
 ### Data Fetching
+
 - Use TanStack Query for all API calls
 - Create custom hooks: `usePosts()`, `useUser(id)`, etc.
 - Use `useQuery` for GET requests
@@ -152,6 +209,7 @@ frontend/
 - Use `staleTime` and `cacheTime` appropriately
 
 ### Forms
+
 - Use React Hook Form for form management
 - Use Zod for form validation (shared with backend)
 - Use `@hookform/resolvers/zod` for integration
@@ -159,6 +217,7 @@ frontend/
 - Disable submit button during submission
 
 ### API Client
+
 - Use Axios instance from `lib/api.ts`
 - Add request interceptors for auth tokens
 - Add response interceptors for error handling
@@ -166,6 +225,7 @@ frontend/
 - Handle 401 errors (redirect to login)
 
 ### Styling
+
 - Use Tailwind CSS utility classes
 - Use shadcn/ui components (don't write custom UI from scratch)
 - Use `cn()` utility for conditional classes
@@ -173,6 +233,7 @@ frontend/
 - Use CSS variables for theming (dark mode support)
 
 ### TypeScript
+
 - Define types in `types/` directory
 - Share types between frontend/backend when possible
 - Use `interface` for object shapes, `type` for unions/intersections
@@ -182,6 +243,7 @@ frontend/
 ## Database Schema Rules
 
 ### Prisma Schema
+
 - Use `@id @default(uuid())` for primary keys
 - Use `@unique` for unique fields (email, username)
 - Use `@default(now())` for timestamps
@@ -192,6 +254,7 @@ frontend/
 - Use `@@map("table_name")` for custom table names
 
 ### Migrations
+
 - Always use `prisma migrate dev` for schema changes
 - Never edit migration files manually
 - Always test migrations on development first
@@ -200,6 +263,7 @@ frontend/
 ## Git & Commits
 
 ### Commit Messages
+
 - Use conventional commits format:
   - `feat:` for new features
   - `fix:` for bug fixes
@@ -211,6 +275,7 @@ frontend/
 - Example: `feat(auth): add refresh token endpoint`
 
 ### Branching
+
 - Use `main` for production-ready code
 - Create feature branches: `feature/user-profile`
 - Create fix branches: `fix/auth-token-expiry`
@@ -218,6 +283,7 @@ frontend/
 ## Code Review Checklist
 
 Before submitting code:
+
 - [ ] TypeScript compiles without errors
 - [ ] No `any` types (unless absolutely necessary)
 - [ ] All API endpoints have validation
@@ -231,6 +297,7 @@ Before submitting code:
 ## Performance
 
 ### Backend
+
 - Use database indexes for frequently queried fields
 - Implement pagination for list endpoints
 - Use `select` to fetch only needed fields
@@ -238,6 +305,7 @@ Before submitting code:
 - Use connection pooling (Prisma handles this)
 
 ### Frontend
+
 - Use Next.js Image component for images
 - Implement code splitting with dynamic imports
 - Use ISR for static content that updates occasionally
@@ -245,12 +313,14 @@ Before submitting code:
 - Use React.memo for expensive components (sparingly)
 
 ## Testing (Future)
+
 - Write unit tests for utilities and helpers
 - Write integration tests for API endpoints
 - Write E2E tests for critical user flows
 - Aim for >70% code coverage
 
 ## Documentation
+
 - Document complex business logic
 - Add JSDoc comments for public APIs
 - Keep README.md updated
@@ -267,25 +337,62 @@ Before submitting code:
 
 ## Common Patterns
 
-### Backend Controller Pattern
+### Backend Clean Architecture Patterns
+
+**Controller Pattern (Presentation Layer):**
+
 ```typescript
-export const controller = async (
+// presentation/controllers/userController.ts
+import { getMeUseCase } from '../../application/use-cases/users/GetMeUseCase.js';
+import { dependencies } from '../../infrastructure/dependencies.js';
+
+export const getMe = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // Validation happens in middleware
-    // Business logic here
-    const result = await prisma.model.findMany();
-    res.json({ success: true, data: result });
+    const user = await getMeUseCase({ userId: req.userId! }, dependencies);
+    res.json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
 };
 ```
 
+**Use Case Pattern (Application Layer):**
+
+```typescript
+// application/use-cases/users/GetMeUseCase.ts
+import { UserRepository } from '../../domain/interfaces/UserRepository.js';
+import { AppError } from '../../infrastructure/config/errors.js';
+
+export async function getMeUseCase(
+  input: { userId: string },
+  dependencies: { userRepository: UserRepository }
+) {
+  const user = await dependencies.userRepository.findById(input.userId);
+  if (!user) throw new AppError('User not found', 404);
+  return user;
+}
+```
+
+**Repository Pattern (Infrastructure Layer):**
+
+```typescript
+// infrastructure/database/PrismaUserRepository.ts
+export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
+  return {
+    async findById(id: string): Promise<User | null> {
+      const user = await prisma.user.findUnique({ where: { id } });
+      return user ? mapToDomainUser(user) : null;
+    },
+  };
+}
+```
+
 ### Frontend Query Hook Pattern
+
 ```typescript
 export const usePosts = () => {
   return useQuery({
@@ -296,6 +403,7 @@ export const usePosts = () => {
 ```
 
 ### Frontend Mutation Pattern
+
 ```typescript
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
@@ -320,3 +428,7 @@ export const useCreatePost = () => {
 - ❌ Don't ignore TypeScript errors
 - ❌ Don't skip error handling
 - ❌ Don't create circular dependencies
+- ❌ **Don't put business logic in controllers** - use use cases
+- ❌ **Don't import infrastructure directly in use cases** - use dependency injection
+- ❌ **Don't put domain logic in infrastructure** - keep it in domain/application
+- ❌ **Don't create dependencies from domain to infrastructure** - dependencies flow inward
