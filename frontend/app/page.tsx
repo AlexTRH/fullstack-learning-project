@@ -11,8 +11,8 @@ export default function Home() {
         </p>
         <div className="flex gap-4">
           <Link
-            href="/example-isr"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            href="/signup"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
           >
             ISR Example
           </Link>
