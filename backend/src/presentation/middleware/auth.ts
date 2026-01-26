@@ -1,6 +1,12 @@
+/**
+ * Presentation: Middleware
+ * JWT authentication middleware
+ */
+
 import { NextFunction, Request, Response } from 'express';
-import { verifyAccessToken } from '../utils/jwt.js';
-import { AppError } from './errorHandler.js';
+import { TokenService } from '../../domain/interfaces/TokenService.js';
+import { AppError } from '../../infrastructure/config/errors.js';
+import { dependencies } from '../../infrastructure/dependencies.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -20,7 +26,8 @@ export const authenticate = (
     }
 
     const token = authHeader.substring(7);
-    const payload = verifyAccessToken(token);
+    const tokenService: TokenService = dependencies.tokenService;
+    const payload = tokenService.verifyAccessToken(token);
 
     req.userId = payload.userId;
     req.userEmail = payload.email;

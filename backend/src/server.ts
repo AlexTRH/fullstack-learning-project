@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { errorHandler } from './middleware/errorHandler.js';
-import { notFound } from './middleware/notFound.js';
+import { errorHandler } from './presentation/middleware/errorHandler.js';
+import { notFound } from './presentation/middleware/notFound.js';
+import authRoutes from './presentation/routes/authRoutes.js';
+import userRoutes from './presentation/routes/userRoutes.js';
 
 dotenv.config();
 
@@ -26,18 +28,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // API routes
-app.get('/api', (req, res) => {
+app.get('/api', (_req, res) => {
   res.json({ message: 'API is running' });
 });
-
-// Import routes
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);

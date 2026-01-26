@@ -1,6 +1,11 @@
+/**
+ * Presentation: Middleware
+ * Request validation middleware using Zod
+ */
+
 import { NextFunction, Request, Response } from 'express';
 import { ZodError, ZodSchema } from 'zod';
-import { AppError } from './errorHandler.js';
+import { AppError } from '../../infrastructure/config/errors.js';
 
 export const validate = (schema: ZodSchema) => {
   return (req: Request, _res: Response, next: NextFunction) => {

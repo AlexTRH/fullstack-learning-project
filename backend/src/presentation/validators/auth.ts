@@ -1,3 +1,8 @@
+/**
+ * Presentation: Validators
+ * Zod schemas for authentication validation
+ */
+
 import { z } from 'zod';
 
 export const registerSchema = z.object({
@@ -30,4 +35,3 @@ export const refreshTokenSchema = z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
   }),
 });
-
