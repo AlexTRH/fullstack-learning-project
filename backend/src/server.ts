@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { errorHandler } from './presentation/middleware/errorHandler.js';
 import { notFound } from './presentation/middleware/notFound.js';
+import { setupSwagger } from './presentation/swagger/swagger.js';
 import authRoutes from './presentation/routes/authRoutes.js';
 import userRoutes from './presentation/routes/userRoutes.js';
 
@@ -26,6 +27,9 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Swagger/OpenAPI documentation
+setupSwagger(app);
 
 // Health check
 app.get('/health', (_req, res) => {
