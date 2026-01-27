@@ -4,7 +4,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { CreateUserData, User, UserWithCounts } from '../../domain/entities/User.js';
+import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User.js';
 import { UserRepository, UserWithPassword } from '../../domain/interfaces/UserRepository.js';
 
 export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
@@ -102,6 +102,32 @@ export function createPrismaUserRepository(prisma: PrismaClient): UserRepository
       return user as UserWithCounts;
     },
 
+    async findByIdPublic(id: string): Promise<UserPublicData | null> {
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatar: true,
+          bio: true,
+          isVerified: true,
+          createdAt: true,
+          _count: {
+            select: {
+              posts: true,
+              followers: true,
+              following: true,
+            },
+          },
+        },
+      });
+
+      if (!user) return null;
+
+      return user as UserPublicData;
+    },
+
     async create(data: CreateUserData): Promise<User> {
       const user = await prisma.user.create({
         data: {
@@ -109,6 +135,19 @@ export function createPrismaUserRepository(prisma: PrismaClient): UserRepository
           username: data.username,
           name: data.name || data.username,
           password: data.password, // Password will be hashed before calling this
+        },
+      });
+
+      return mapToDomainUser(user);
+    },
+
+    async update(id: string, data: UpdateUserData): Promise<User> {
+      const user = await prisma.user.update({
+        where: { id },
+        data: {
+          ...(data.name !== undefined && { name: data.name }),
+          ...(data.bio !== undefined && { bio: data.bio }),
+          ...(data.avatar !== undefined && { avatar: data.avatar }),
         },
       });
 
