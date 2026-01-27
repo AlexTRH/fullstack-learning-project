@@ -16,22 +16,12 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const schema = z
-  .object({
-    fullname: z.string().trim().min(3),
-    email: z.string().email(),
-    password: z.string().trim().min(8),
-    confirmPassword: z.string().trim().min(8),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords dont match",
-    path: ["confirmPassword"],
-  });
-
-type SignUpFormFields = z.infer<typeof schema>;
+import { useAuth } from "@/app/features/auth/useAuth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { SignUpFormUserData } from "@/app/features/auth/types";
+import { schema } from "@/app/features/auth/types";
 
 export function SignupForm({
   className,
@@ -41,13 +31,24 @@ export function SignupForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpFormFields>({
+  } = useForm<SignUpFormUserData>({
     resolver: zodResolver(schema),
   });
 
-  const onSubmit: SubmitHandler<SignUpFormFields> = async (data) => {
-    await new Promise((res) => setTimeout(res, 1000));
-    // взаимодействие с бэком
+  const [error, setError] = useState<string | null>(null);
+
+  const { signUp } = useAuth();
+  const router = useRouter();
+
+  const onSubmit: SubmitHandler<SignUpFormUserData> = async (data) => {
+    const result = await signUp(data);
+
+    if (result.ok) {
+      router.push("/dashboard");
+      setError(null);
+    } else {
+      setError(result.error);
+    }
   };
 
   return (
@@ -73,7 +74,22 @@ export function SignupForm({
                 />
                 {errors.fullname && (
                   <p className="text-xs text-red-500">
-                    {errors.fullname.message}
+                    {errors.fullname?.message}
+                  </p>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="username">Username</FieldLabel>
+                <Input
+                  {...register("username")}
+                  id="username"
+                  type="text"
+                  placeholder="john123"
+                  required
+                />
+                {errors.username && (
+                  <p className="text-xs text-red-500">
+                    {errors.username?.message}
                   </p>
                 )}
               </Field>
@@ -86,9 +102,14 @@ export function SignupForm({
                   placeholder="m@example.com"
                   required
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500">
+                    {errors.email?.message}
+                  </p>
+                )}
               </Field>
               <Field>
-                <Field className="grid grid-cols-2 gap-4">
+                <FieldGroup className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
                     <Input
@@ -109,13 +130,18 @@ export function SignupForm({
                       required
                     />
                   </Field>
-                </Field>
+                </FieldGroup>
                 <FieldDescription>
                   Must be at least 8 characters long.
                 </FieldDescription>
                 {errors.confirmPassword && (
                   <p className="text-xs text-red-500">
-                    {errors.confirmPassword.message}
+                    {errors.confirmPassword?.message}
+                  </p>
+                )}
+                {errors.password && (
+                  <p className="text-xs text-red-500">
+                    {errors.password?.message}
                   </p>
                 )}
               </Field>
@@ -139,6 +165,7 @@ export function SignupForm({
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
+      {error && <p className="text-center text-sm text-red-500">{error}</p>}
     </div>
   );
 }

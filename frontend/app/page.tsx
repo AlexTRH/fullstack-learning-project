@@ -14,7 +14,7 @@ export default function Home() {
             href="/signup"
             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
           >
-            ISR Example
+            Try
           </Link>
         </div>
       </main>
