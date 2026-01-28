@@ -17,11 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/app/features/auth/useAuth";
+import { useAuth } from "@/features/auth/useAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { SignUpFormUserData } from "@/app/features/auth/types";
-import { schema } from "@/app/features/auth/types";
+import type { SignUpFormUserData } from "@/features/auth/types";
+import { schema } from "@/features/auth/types";
 
 export function SignupForm({
   className,

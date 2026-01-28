@@ -1,6 +1,6 @@
 "use client";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useAuth } from "../features/auth/useAuth";
+import { useAuth } from "../../features/auth/useAuth";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {

@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/stores/useAuthStore";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+import api from "@/lib/api";
 import { SignUpFormUserData } from "./types";
 import type { SignUpResponse } from "./types";
 
@@ -8,15 +9,12 @@ export function useAuth() {
 
   async function signUp(userData: SignUpFormUserData) {
     try {
-      const { data } = await axios.post<SignUpResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
-        {
-          email: userData.email,
-          username: userData.username,
-          password: userData.password,
-          name: userData.fullname,
-        }
-      );
+      const { data } = await api.post<SignUpResponse>(`/api/auth/register`, {
+        email: userData.email,
+        username: userData.username,
+        password: userData.password,
+        name: userData.fullname,
+      });
 
       const user = data.data.user;
       const token = data.data.accessToken;
@@ -35,14 +33,11 @@ export function useAuth() {
 
   async function signOut() {
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`,
+      await api.post(
+        `/api/auth/logout`,
         {},
         {
           withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
