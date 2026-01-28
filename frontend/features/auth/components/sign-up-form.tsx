@@ -21,7 +21,8 @@ import { useAuth } from "@/features/auth/useAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { SignUpFormUserData } from "@/features/auth/types";
-import { schema } from "@/features/auth/types";
+import { signUpSchema } from "@/features/auth/types";
+import Link from "next/link";
 
 export function SignupForm({
   className,
@@ -32,7 +33,7 @@ export function SignupForm({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormUserData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(signUpSchema),
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +155,7 @@ export function SignupForm({
                   {isSubmitting ? "Loading..." : "Create Account"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  Already have an account? <Link href="/sign-in">Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

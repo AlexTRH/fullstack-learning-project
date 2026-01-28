@@ -5,7 +5,7 @@ interface InternalAxiosRequestWithRetry extends InternalAxiosRequestConfig {
   retry: boolean;
 }
 
-const api = axios.create({
+const authApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   headers: {
     "Content-Type": "application/json",
@@ -13,7 +13,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use(
+const publicApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+authApi.interceptors.request.use(
   (config) => {
     config.headers.Authorization = `Bearer ${useAuthStore.getState().token}`;
     return config;
@@ -23,7 +30,7 @@ api.interceptors.request.use(
   }
 );
 
-api.interceptors.response.use(
+authApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (!axios.isAxiosError(error)) {
@@ -51,7 +58,7 @@ api.interceptors.response.use(
         const newAccessToken = response.data.data.accessToken;
 
         useAuthStore.getState().setToken(newAccessToken);
-        return api(originalRequest);
+        return authApi(originalRequest);
       } catch (error) {
         useAuthStore.getState().logout();
         return Promise.reject(error);
@@ -61,4 +68,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default authApi;

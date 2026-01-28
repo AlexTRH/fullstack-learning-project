@@ -11,7 +11,7 @@ export default function Home() {
         </p>
         <div className="flex gap-4">
           <Link
-            href="/signup"
+            href="/sign-up"
             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
           >
             Try

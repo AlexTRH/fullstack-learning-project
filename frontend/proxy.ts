@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useAuthStore } from "./stores/useAuthStore";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
   if (!isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 }
 
