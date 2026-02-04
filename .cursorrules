@@ -177,10 +177,18 @@ frontend/
 - Use App Router (not Pages Router)
 - Use Server Components by default, mark Client Components with `"use client"`
 - Use `async` Server Components for data fetching
+- Run independent fetches in parallel: use `Promise.all()` for multiple calls; in RSC use composition so sections don't wait on each other (e.g. separate async components for header/sidebar that each fetch their own data)
+- Defer `await` to the branch that needs the result — early-return paths should not wait on unused data
+- Use Suspense boundaries so layout can render while data loads in child components
+- Use `React.cache()` for per-request deduplication of auth, DB, or other async work in Server Components; pass primitive or stable object args so cache hits work
+- Pass minimal data into client components; avoid passing the same large object to multiple clients (duplicate serialization)
 - Implement ISR (Incremental Static Regeneration) where appropriate
 - Use `revalidate` for ISR: `export const revalidate = 60`
 - Use `next/image` for images, `next/link` for navigation
 - Never use `useEffect` for data fetching - use Server Components or TanStack Query
+- Prefer direct imports for heavy libraries (e.g. lucide-react, @mui/material, date-fns) or set `optimizePackageImports` in next.config
+- Use `next/dynamic` for heavy components not needed on first paint (editors, heavy modals); use `ssr: false` for client-only components
+- Defer non-critical third-party scripts (analytics, etc.) until after hydration (e.g. dynamic import in useEffect or on interaction)
 
 ### React Patterns
 
@@ -190,6 +198,11 @@ frontend/
 - Keep components small and focused
 - Use composition over inheritance
 - Prefer controlled components for forms
+- Derive values during render instead of storing in state and syncing in `useEffect` (e.g. `fullName = firstName + ' ' + lastName`)
+- Use lazy state init when initial state is expensive: `useState(() => expensive())`
+- Use `startTransition` / `useTransition` for non-urgent UI updates instead of manual loading flags where it fits
+- For conditionals that may be 0 or NaN use explicit ternary (`count > 0 ? <Badge /> : null`) not `count && <Badge />`
+- Hoist static JSX and constants outside the component when they don't depend on props/state
 
 ### State Management
 
@@ -293,6 +306,8 @@ Before submitting code:
 - [ ] Environment variables are not hardcoded
 - [ ] Code is formatted with Prettier
 - [ ] No console.logs in production code (use proper logging)
+- [ ] No unnecessary async waterfalls (use Promise.all / parallel RSC where applicable)
+- [ ] Heavy UI or third-party libs use dynamic import / next/dynamic where appropriate
 
 ## Performance
 
@@ -432,3 +447,5 @@ export const useCreatePost = () => {
 - ❌ **Don't import infrastructure directly in use cases** - use dependency injection
 - ❌ **Don't put domain logic in infrastructure** - keep it in domain/application
 - ❌ **Don't create dependencies from domain to infrastructure** - dependencies flow inward
+- ❌ **Don't await independent async operations sequentially** - use Promise.all() or parallel Server Components
+- ❌ **Don't use barrel imports for heavy libraries** (lucide-react, @mui/material, etc.) without optimizePackageImports or direct imports
