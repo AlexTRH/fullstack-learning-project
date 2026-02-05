@@ -195,7 +195,10 @@ frontend/
 - Use functional components with hooks
 - Extract reusable logic into custom hooks
 - Use `useMemo` and `useCallback` sparingly (only when needed)
-- Keep components small and focused
+- **Keep components and page files small**: if a single file grows beyond ~100–150 lines or mixes data fetching, types, helpers and a lot of JSX, split it:
+  - **Pages** (`app/**/page.tsx`): only routing, auth guard, `useQuery`/`useMutation`, and composition of feature components; no large inline JSX or business types.
+  - **Feature logic**: put API types and fetch functions in `features/<feature>/api.ts` or `types.ts`, helpers in `utils.ts`, UI in `features/<feature>/components/`.
+  - **One component, one responsibility**: loading/error/success states can be separate small components (e.g. `*Loading`, `*Error`) composed by the page.
 - Use composition over inheritance
 - Prefer controlled components for forms
 - Derive values during render instead of storing in state and syncing in `useEffect` (e.g. `fullName = firstName + ' ' + lastName`)
@@ -237,13 +240,13 @@ frontend/
 - Use TypeScript types for request/response
 - Handle 401 errors (redirect to login)
 
-### Styling
+### Styling & design tokens (single source of truth)
 
-- Use Tailwind CSS utility classes
+- **Colors and theme**: All palette and radius live in `frontend/app/globals.css` (CSS variables in `:root` and `.dark`). Use Tailwind classes that reference them: `bg-primary`, `text-muted-foreground`, `border-border`, `rounded-lg`, etc. Do not use arbitrary colors (e.g. `bg-[#fff]`) in components.
+- **Layout tokens**: Use `p-page`, `md:p-page-md`, `max-w-content`, `max-w-content-narrow` from `globals.css` + `tailwind.config.ts` (same values as `p-6`, `md:p-10`, `max-w-md`, `max-w-sm`). Use these tokens for page padding and content width so changes live in one place; keep token values equal to Tailwind defaults so the UI look is unchanged.
 - Use shadcn/ui components (don't write custom UI from scratch)
 - Use `cn()` utility for conditional classes
 - Follow mobile-first responsive design
-- Use CSS variables for theming (dark mode support)
 
 ### TypeScript
 
@@ -449,3 +452,4 @@ export const useCreatePost = () => {
 - ❌ **Don't create dependencies from domain to infrastructure** - dependencies flow inward
 - ❌ **Don't await independent async operations sequentially** - use Promise.all() or parallel Server Components
 - ❌ **Don't use barrel imports for heavy libraries** (lucide-react, @mui/material, etc.) without optimizePackageImports or direct imports
+- ❌ **Don't let page or component files grow large** (~100+ lines with mixed types, fetch, and JSX) — split into `features/<name>/api`, `utils`, and small UI components first

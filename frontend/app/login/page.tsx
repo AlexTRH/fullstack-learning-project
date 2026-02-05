@@ -1,5 +1,11 @@
-"use client";
+import { LoginForm } from "@/features/auth/components/login-form";
 
-export default function Login() {
-  return <h2>Login page</h2>;
+export default function Page() {
+  return (
+    <div className="flex min-h-svh w-full items-center justify-center p-page md:p-page-md">
+      <div className="w-full max-w-content-narrow">
+        <LoginForm />
+      </div>
+    </div>
+  );
 }

@@ -1,22 +1,15 @@
-import Link from "next/link";
+import { HomeCTA } from "./components/HomeCTA";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-8">
       <main className="flex flex-col items-center gap-8 text-center">
         <h1 className="text-4xl font-bold">Fullstack Learning Project</h1>
-        <p className="text-muted-foreground max-w-md">
+        <p className="text-muted-foreground max-w-content">
           Учебный проект с Next.js, Express, PostgreSQL, Prisma, TanStack Query,
           Zustand и shadcn/ui
         </p>
-        <div className="flex gap-4">
-          <Link
-            href="/signup"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
-          >
-            Try
-          </Link>
-        </div>
+        <HomeCTA />
       </main>
     </div>
   );

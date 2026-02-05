@@ -6,7 +6,7 @@ interface InternalAxiosRequestWithRetry extends InternalAxiosRequestConfig {
 }
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -37,22 +37,32 @@ api.interceptors.response.use(
       !originalRequest.retry &&
       axios.isAxiosError(error)
     ) {
+      const refreshToken = useAuthStore.getState().refreshToken;
+      if (!refreshToken) {
+        useAuthStore.getState().logout();
+        return Promise.reject(error);
+      }
       try {
         originalRequest.retry = true;
 
+        const baseURL = process.env.NEXT_PUBLIC_API_URL;
+        if (!baseURL) {
+          useAuthStore.getState().logout();
+          return Promise.reject(error);
+        }
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/refresh`,
-          {},
+          `${baseURL}/api/auth/refresh`,
+          { refreshToken },
           {
             withCredentials: true,
+            headers: { "Content-Type": "application/json" },
           }
         );
 
         const newAccessToken = response.data.data.accessToken;
-
         useAuthStore.getState().setToken(newAccessToken);
         return api(originalRequest);
-      } catch (error) {
+      } catch {
         useAuthStore.getState().logout();
         return Promise.reject(error);
       }

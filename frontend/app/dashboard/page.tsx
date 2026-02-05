@@ -1,35 +1,60 @@
 "use client";
+
+import { useAuth } from "@/features/auth/useAuth";
+import { fetchMe } from "@/features/profile/api";
+import { ProfileCard } from "@/features/profile/components/ProfileCard";
+import { ProfileCardError } from "@/features/profile/components/ProfileCardError";
+import { ProfileCardLoading } from "@/features/profile/components/ProfileCardLoading";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useAuth } from "../../features/auth/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+const DASHBOARD_LAYOUT_CLASS =
+  "flex min-h-svh w-full items-center justify-center p-page md:p-page-md";
 
 export default function Dashboard() {
-  const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
-  const { signOut } = useAuth();
   const router = useRouter();
+  const { signOut } = useAuth();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const onLogoutClick = async () => {
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["me"],
+    queryFn: fetchMe,
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  const onLogout = async () => {
     const result = await signOut();
-
-    if (result.ok) {
-      router.push("/login");
-    }
+    if (result.ok) router.push("/login");
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) router.replace("/login");
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
+
   return (
-    <div>
-      <h2>Registered successfully</h2>
-      <p>user id: {user?.id}</p>
-      <p>user name: {user?.name}</p>
-      <p>user email: {user?.email}</p>
-      <p className="break-all">user access token: {token}</p>
-      <button
-        className="bg-primary cursor-pointer rounded-xl px-10 py-5 text-white"
-        onClick={onLogoutClick}
-      >
-        Logout
-      </button>
+    <div className={DASHBOARD_LAYOUT_CLASS}>
+      <div className="max-w-content w-full">
+        {isLoading && <ProfileCardLoading />}
+        {isError && (
+          <ProfileCardError
+            message={
+              error instanceof Error ? error.message : "Failed to load profile"
+            }
+            onSignInAgain={() => router.push("/login")}
+          />
+        )}
+        {profile && <ProfileCard profile={profile} onLogout={onLogout} />}
+      </div>
     </div>
   );
 }
