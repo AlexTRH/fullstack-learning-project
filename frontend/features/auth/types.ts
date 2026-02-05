@@ -29,12 +29,13 @@ export const schema = z
 
 export type SignUpFormUserData = z.infer<typeof schema>;
 
-export const loginSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+export { loginSchema };
 
 type SignUpResponseData = {
   accessToken: string;

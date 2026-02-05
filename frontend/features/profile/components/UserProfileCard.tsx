@@ -20,9 +20,11 @@ import { getInitials } from "../utils";
 
 type UserProfileCardProps = {
   user: UserPublicResponse;
+  onFollowersClick?: () => void;
+  onFollowingClick?: () => void;
 };
 
-export function UserProfileCard({ user }: UserProfileCardProps) {
+export function UserProfileCard({ user, onFollowersClick, onFollowingClick }: UserProfileCardProps) {
   const queryClient = useQueryClient();
   const currentUserId = useAuthStore((s) => s.user?.id ?? null);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -72,11 +74,49 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
             <p className="text-2xl font-semibold">{user._count.posts}</p>
             <p className="text-xs text-muted-foreground">Posts</p>
           </div>
-          <div>
+          <div
+            role={onFollowersClick ? "button" : undefined}
+            tabIndex={onFollowersClick ? 0 : undefined}
+            onClick={onFollowersClick}
+            onKeyDown={
+              onFollowersClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onFollowersClick();
+                    }
+                  }
+                : undefined
+            }
+            className={
+              onFollowersClick
+                ? "cursor-pointer rounded-md transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+                : undefined
+            }
+          >
             <p className="text-2xl font-semibold">{user._count.followers}</p>
             <p className="text-xs text-muted-foreground">Followers</p>
           </div>
-          <div>
+          <div
+            role={onFollowingClick ? "button" : undefined}
+            tabIndex={onFollowingClick ? 0 : undefined}
+            onClick={onFollowingClick}
+            onKeyDown={
+              onFollowingClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onFollowingClick();
+                    }
+                  }
+                : undefined
+            }
+            className={
+              onFollowingClick
+                ? "cursor-pointer rounded-md transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+                : undefined
+            }
+          >
             <p className="text-2xl font-semibold">{user._count.following}</p>
             <p className="text-xs text-muted-foreground">Following</p>
           </div>

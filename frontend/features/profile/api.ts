@@ -63,3 +63,19 @@ export async function toggleFollow(userId: string): Promise<{ isFollowing: boole
   }>(`/api/users/${userId}/follow`);
   return data.data;
 }
+
+export async function fetchFollowers(userId: string): Promise<UserPublicResponse[]> {
+  const { data } = await api.get<{
+    success: boolean;
+    data: UserPublicResponse[];
+  }>(`/api/users/${userId}/followers`);
+  return data.data;
+}
+
+export async function fetchFollowing(userId: string): Promise<UserPublicResponse[]> {
+  const { data } = await api.get<{
+    success: boolean;
+    data: UserPublicResponse[];
+  }>(`/api/users/${userId}/following`);
+  return data.data;
+}

@@ -19,7 +19,7 @@ export function HomeCTA() {
           href="/dashboard/settings"
           className="border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2"
         >
-          Настройки профиля
+          Profile settings
         </Link>
       </div>
     );

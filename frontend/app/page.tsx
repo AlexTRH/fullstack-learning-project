@@ -6,8 +6,8 @@ export default function Home() {
       <main className="flex flex-col items-center gap-8 text-center">
         <h1 className="text-4xl font-bold">Fullstack Learning Project</h1>
         <p className="text-muted-foreground max-w-content">
-          Учебный проект с Next.js, Express, PostgreSQL, Prisma, TanStack Query,
-          Zustand и shadcn/ui
+          Learning project with Next.js, Express, PostgreSQL, Prisma, TanStack
+          Query, Zustand and shadcn/ui
         </p>
         <HomeCTA />
       </main>

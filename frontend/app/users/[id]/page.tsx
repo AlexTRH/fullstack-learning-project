@@ -1,25 +1,41 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { fetchUserById } from "@/features/profile/api";
+import { fetchUserById, fetchFollowers, fetchFollowing } from "@/features/profile/api";
 import { UserProfileCard } from "@/features/profile/components/UserProfileCard";
+import { UserListItem } from "@/features/profile/components/UserListItem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const PAGE_LAYOUT_CLASS =
   "flex min-h-svh w-full items-center justify-center p-page md:p-page-md";
 
+type OpenList = "followers" | "following" | null;
+
 type PageProps = { params: Promise<{ id: string }> };
 
 export default function UserProfilePage({ params }: PageProps) {
   const { id } = use(params);
+  const [openList, setOpenList] = useState<OpenList>(null);
 
   const { data: user, isLoading, isError, error } = useQuery({
     queryKey: ["user", id],
     queryFn: () => fetchUserById(id),
     retry: false,
+  });
+
+  const { data: followers = [], isLoading: isLoadingFollowers } = useQuery({
+    queryKey: ["user", id, "followers"],
+    queryFn: () => fetchFollowers(id),
+    enabled: !!user && openList === "followers",
+  });
+
+  const { data: following = [], isLoading: isLoadingFollowing } = useQuery({
+    queryKey: ["user", id, "following"],
+    queryFn: () => fetchFollowing(id),
+    enabled: !!user && openList === "following",
   });
 
   if (isLoading) {
@@ -60,13 +76,60 @@ export default function UserProfilePage({ params }: PageProps) {
     );
   }
 
+  const list = openList === "followers" ? followers : following;
+  const isLoadingList =
+    openList === "followers" ? isLoadingFollowers : isLoadingFollowing;
+
+  const toggleFollowers = () =>
+    setOpenList((prev) => (prev === "followers" ? null : "followers"));
+  const toggleFollowing = () =>
+    setOpenList((prev) => (prev === "following" ? null : "following"));
+
   return (
     <div className={PAGE_LAYOUT_CLASS}>
       <div className="w-full max-w-content space-y-6">
         <Button variant="ghost" asChild>
           <Link href="/">← Home</Link>
         </Button>
-        <UserProfileCard user={user} />
+        <UserProfileCard
+          user={user}
+          onFollowersClick={toggleFollowers}
+          onFollowingClick={toggleFollowing}
+        />
+        {openList !== null && (
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-muted-foreground">
+              {openList === "followers"
+                ? `Followers (${user._count.followers})`
+                : `Following (${user._count.following})`}
+            </p>
+            {isLoadingList ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-12">
+                  <p className="text-muted-foreground text-sm">Loading...</p>
+                </CardContent>
+              </Card>
+            ) : list.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground text-sm">
+                    {openList === "followers"
+                      ? "No followers"
+                      : "Not following anyone"}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <ul className="space-y-2">
+                {list.map((u) => (
+                  <li key={u.id}>
+                    <UserListItem user={u} profileUserId={id} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
