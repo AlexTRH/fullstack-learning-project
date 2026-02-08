@@ -79,3 +79,31 @@ export async function fetchFollowing(userId: string): Promise<UserPublicResponse
   }>(`/api/users/${userId}/following`);
   return data.data;
 }
+
+export type ListUsersParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+};
+
+export type ListUsersResponse = {
+  users: UserPublicResponse[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export async function fetchUsers(
+  params: ListUsersParams = {}
+): Promise<ListUsersResponse> {
+  const { page = 1, limit = 20, search } = params;
+  const sp = new URLSearchParams();
+  sp.set("page", String(page));
+  sp.set("limit", String(limit));
+  if (search?.trim()) sp.set("search", search.trim());
+  const { data } = await api.get<{
+    success: boolean;
+    data: ListUsersResponse;
+  }>(`/api/users?${sp.toString()}`);
+  return data.data;
+}
