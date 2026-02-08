@@ -6,7 +6,7 @@
 
 ### Backend
 - **Node.js** 20+ с TypeScript
-- **Express.js** - веб-фреймворк
+- **NestJS** - веб-фреймворк
 - **PostgreSQL** - база данных
 - **Prisma** - ORM
 - **JWT** - аутентификация
@@ -65,13 +65,13 @@ pnpm run dev
 
 ```
 fullstack-learning-project/
-├── backend/           # Express API
+├── backend/           # NestJS API
 │   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   ├── utils/
-│   │   └── server.ts
+│   │   ├── auth/          # модуль аутентификации
+│   │   ├── users/         # модуль пользователей
+│   │   ├── prisma/        # PrismaService
+│   │   ├── common/        # guards, filters, decorators
+│   │   └── main.ts        # точка входа
 │   ├── prisma/
 │   │   └── schema.prisma
 │   └── package.json

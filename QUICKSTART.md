@@ -163,13 +163,12 @@ pnpm run lint         # Проверка кода
 ```
 backend/
 ├── src/
-│   ├── controllers/     # Обработчики запросов
-│   ├── routes/          # API роуты
-│   ├── middleware/      # Express middleware
-│   ├── utils/           # Утилиты (JWT, bcrypt)
-│   ├── validators/      # Zod схемы валидации
-│   ├── lib/             # Prisma Client
-│   └── server.ts        # Точка входа
+│   ├── auth/            # Модуль аутентификации (NestJS)
+│   ├── users/           # Модуль пользователей
+│   ├── prisma/          # PrismaService
+│   ├── common/          # guards, filters, decorators
+│   ├── presentation/validators/  # Zod схемы валидации
+│   └── main.ts          # Точка входа
 └── prisma/
     └── schema.prisma    # Схема БД
 ```

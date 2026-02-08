@@ -535,9 +535,9 @@ git commit -m "feat(users): add getMe endpoint"
 git add backend/src/routes/userRoutes.ts
 git commit -m "feat(users): add user routes"
 
-# ... обновил server.ts
-git add backend/src/server.ts
-git commit -m "feat(users): register user routes in server"
+# ... обновил app или модули
+git add backend/src/
+git commit -m "feat(users): register user routes in app"
 
 # 4. Пушить регулярно
 git push origin feature/user-profile-endpoints

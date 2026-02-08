@@ -1,84 +1,53 @@
 # API Documentation
 
+## Как это устроено
+
+Swagger поднят через **NestJS** (`@nestjs/swagger`). В `main.ts` создаётся OpenAPI-документ (DocumentBuilder + SwaggerModule), подключается Bearer Auth, UI монтируется по пути `api-docs`. Документ собирается автоматически из контроллеров: маршруты и типы Nest подхватываются, а теги и описания задаются декораторами в коде.
+
+- **Swagger UI** — интерактивная документация и «Try it out».
+- **OpenAPI JSON** — по фиксированному URL (см. ниже), для генерации типов на фронте и импорта в Postman.
+
 ## 📚 Swagger UI
 
-После запуска сервера, документация доступна по адресу:
+После запуска бэкенда (`pnpm run dev` в `backend/`):
 
-**<http://localhost:5001/api-docs>**
+**http://localhost:5001/api-docs** (порт из `PORT` в `.env`, по умолчанию 5000/5001)
 
-Здесь вы можете:
+В UI можно:
 
-- Просмотреть все доступные endpoints
-- Увидеть схемы запросов и ответов
-- Протестировать API прямо в браузере
-- Скопировать примеры запросов
+- Смотреть все эндпоинты по тегам (Health, Auth, Users).
+- Для защищённых маршрутов нажать **Authorize**, ввести `Bearer <accessToken>` и вызывать запросы из браузера.
+- Смотреть описание операций и коды ответов (добавлены декораторы `@ApiOperation`, `@ApiResponse`, `@ApiBearerAuth()`).
 
-## 📥 OpenAPI JSON Schema
+## 📥 OpenAPI JSON
 
-Для генерации TypeScript типов на фронтенде, используйте:
+Схема в формате OpenAPI 3.0 доступна по адресу:
 
-**<http://localhost:5001/api-docs.json>**
+**http://localhost:5001/api-docs-json**
 
-Эта схема может быть использована с инструментами типа:
+(Путь всегда `{путь_UI}-json`: в `main.ts` задан `api-docs`, значит JSON — `api-docs-json`.)
 
-- `openapi-typescript` - генерация TypeScript типов
-- `swagger-codegen` - генерация клиентов
-- Postman - импорт API
+Использование:
 
-## 🔧 Как добавить документацию к новому endpoint
+- **openapi-typescript** — генерация TypeScript-типов для фронта.
+- **Postman / Insomnia** — импорт по этому URL.
+- **swagger-codegen** и др. — генерация клиентов.
 
-Документация вынесена в отдельные файлы для чистоты кода:
+## 🔧 Как добавить описание нового endpoint
 
-**Структура:**
+В контроллере добавь декораторы Nest Swagger:
 
-```
-backend/src/presentation/swagger/docs/
-├── auth.js      # Документация для auth endpoints
-└── users.js     # Документация для user endpoints
-```
+- `@ApiTags('ИмяГруппы')` на класс контроллера.
+- `@ApiOperation({ summary: '...' })` — краткое описание.
+- `@ApiResponse({ status: 200, description: '...' })` и при необходимости 400, 401, 404.
+- Для маршрутов с JWT: `@ApiBearerAuth()` (в конфиге уже включён `addBearerAuth()`).
 
-**Добавление нового endpoint:**
-
-1. Откройте соответствующий файл в `swagger/docs/` (или создайте новый)
-2. Добавьте JSDoc комментарий с `@swagger` тегом:
-
-```javascript
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Get user by ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string, format: uuid }
- *         description: User ID
- *     responses:
- *       200:
- *         description: User found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success: { type: boolean }
- *                 data: { $ref: '#/components/schemas/UserPublic' }
- *       404: { $ref: '#/components/responses/NotFound' }
- */
-```
-
-1. Роут в `routes/*.ts` остается чистым:
-
-```typescript
-router.get('/:id', getUserById);
-```
+Валидация по-прежнему через Zod (схемы в `auth/schemas/`, `users/schemas/`). Если нужно отобразить в Swagger точные поля body, можно добавить DTO-классы с `@ApiProperty()` или вручную описать схему в `@ApiBody()`; для базового описания эндпоинтов текущих декораторов достаточно.
 
 ## 📖 Полезные ссылки
 
 - [OpenAPI 3.0 Specification](https://swagger.io/specification/)
-- [Swagger JSDoc Examples](https://github.com/Surnet/swagger-jsdoc/blob/master/docs/GETTING-STARTED.md)
+- [NestJS Swagger](https://docs.nestjs.com/openapi/introduction)
 
 ## 🎯 Для фронтенда
 
@@ -88,9 +57,11 @@ router.get('/:id', getUserById);
 # Установить openapi-typescript
 pnpm add -D openapi-typescript
 
-# Генерация типов
-npx openapi-typescript http://localhost:5001/api-docs.json -o src/types/api.ts
+# Убедиться, что backend запущен; затем сгенерировать типы
+npx openapi-typescript http://localhost:5001/api-docs-json -o src/types/api.ts
 ```
+
+(Путь к JSON-схеме уточни в Swagger UI или в коде `main.ts`.)
 
 ### Использование в коде
 
