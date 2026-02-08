@@ -5,7 +5,12 @@
 
 import { PrismaClient } from '@prisma/client';
 import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User.js';
-import { UserRepository, UserWithPassword } from '../../domain/interfaces/UserRepository.js';
+import {
+  ListUsersPublicParams,
+  ListUsersPublicResult,
+  UserRepository,
+  UserWithPassword,
+} from '../../domain/interfaces/UserRepository.js';
 
 export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
   return {
@@ -126,6 +131,49 @@ export function createPrismaUserRepository(prisma: PrismaClient): UserRepository
       if (!user) return null;
 
       return user as UserPublicData;
+    },
+
+    async findManyPublic(params: ListUsersPublicParams): Promise<ListUsersPublicResult> {
+      const { skip, take, search } = params;
+      const where = search?.trim()
+        ? {
+            OR: [
+              { username: { contains: search.trim(), mode: 'insensitive' as const } },
+              { name: { contains: search.trim(), mode: 'insensitive' as const } },
+            ],
+          }
+        : undefined;
+
+      const [users, total] = await Promise.all([
+        prisma.user.findMany({
+          where,
+          skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatar: true,
+            bio: true,
+            isVerified: true,
+            createdAt: true,
+            _count: {
+              select: {
+                posts: true,
+                followers: true,
+                following: true,
+              },
+            },
+          },
+        }),
+        prisma.user.count({ where }),
+      ]);
+
+      return {
+        users: users as UserPublicData[],
+        total,
+      };
     },
 
     async create(data: CreateUserData): Promise<User> {

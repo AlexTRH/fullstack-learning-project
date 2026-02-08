@@ -7,6 +7,47 @@
 
 /**
  * @swagger
+ * /api/users:
+ *   get:
+ *     summary: List users (find people)
+ *     description: Returns a paginated list of users with optional search by username or name. Public, no auth required.
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, minimum: 1, default: 1 }
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+ *         description: Items per page
+ *       - in: query
+ *         name: search
+ *         schema: { type: string, maxLength: 100 }
+ *         description: Search by username or display name (case-insensitive)
+ *     responses:
+ *       200:
+ *         description: List of users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items: { $ref: '#/components/schemas/UserPublic' }
+ *                     total: { type: integer, description: Total count matching the query }
+ *                     page: { type: integer }
+ *                     limit: { type: integer }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ */
+
+/**
+ * @swagger
  * /api/users/me:
  *   get:
  *     summary: Get authenticated user's profile
