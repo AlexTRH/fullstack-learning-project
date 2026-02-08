@@ -7,9 +7,34 @@ import { Response, NextFunction, Request } from 'express';
 import { AuthRequest } from '../middleware/auth.js';
 import { getMeUseCase } from '../../application/use-cases/users/GetMeUseCase.js';
 import { getUserByIdUseCase } from '../../application/use-cases/users/GetUserByIdUseCase.js';
+import { listUsersUseCase } from '../../application/use-cases/users/ListUsersUseCase.js';
 import { updateUserUseCase } from '../../application/use-cases/users/UpdateUserUseCase.js';
 import { dependencies } from '../../infrastructure/dependencies.js';
 import { AppError } from '../../infrastructure/config/errors.js';
+
+export const listUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+    const search = (req.query.search as string)?.trim();
+
+    const result = await listUsersUseCase(
+      { page, limit, search: search || undefined },
+      dependencies
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getMe = async (
   req: AuthRequest,

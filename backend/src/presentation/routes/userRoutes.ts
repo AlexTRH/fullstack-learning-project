@@ -5,12 +5,15 @@
 
 import { Router } from 'express';
 import { getFollowers, getFollowing, toggleFollow } from '../controllers/followController.js';
-import { getMe, getUserById, updateUser } from '../controllers/userController.js';
+import { getMe, getUserById, listUsers, updateUser } from '../controllers/userController.js';
 import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { updateUserSchema } from '../validators/user.js';
+import { listUsersQuerySchema, updateUserSchema } from '../validators/user.js';
 
 const router: Router = Router();
+
+// GET /api/users - List users (find people), pagination + optional search
+router.get('/', validate(listUsersQuerySchema), listUsers);
 
 // GET /api/users/me - Get authenticated user's profile
 router.get('/me', authenticate, getMe);
