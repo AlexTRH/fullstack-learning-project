@@ -28,7 +28,7 @@ export async function refreshTokenUseCase(
   let payload;
   try {
     payload = tokenService.verifyRefreshToken(input.refreshToken);
-  } catch (error) {
+  } catch {
     throw new AppError('Invalid or expired refresh token', 401);
   }
 

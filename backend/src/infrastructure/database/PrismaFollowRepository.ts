@@ -3,12 +3,12 @@
  * Prisma implementation of FollowRepository
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateFollowData, Follow } from '../../domain/entities/Follow.js';
 import { UserPublicData } from '../../domain/entities/User.js';
 import { FollowRepository } from '../../domain/interfaces/FollowRepository.js';
 
-export function createPrismaFollowRepository(prisma: PrismaClient): FollowRepository {
+export function createPrismaFollowRepository(prisma: PrismaService): FollowRepository {
   return {
     async create(data: CreateFollowData): Promise<Follow> {
       const follow = await prisma.follow.create({

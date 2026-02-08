@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPrismaUserRepository } from './database/PrismaUserRepository';
 import { createPrismaRefreshTokenRepository } from './database/PrismaRefreshTokenRepository';
@@ -19,6 +20,7 @@ export const PASSWORD_HASHER = 'PASSWORD_HASHER';
 
 @Global()
 @Module({
+  imports: [PrismaModule],
   providers: [
     {
       provide: USER_REPOSITORY,

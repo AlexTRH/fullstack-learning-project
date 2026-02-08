@@ -50,6 +50,7 @@ backend/src/
 | api/auth/login | POST | 200, `{ success, data }` |
 | api/auth/refresh | POST | 200, `{ success, data }` |
 | api/auth/logout | POST | JWT обязателен, 200, `{ success, message }` |
+| api/users | GET | Список пользователей (find people): `?page=1&limit=20&search=`, `{ success, data: { users, total, page, limit } }` |
 | api/users/me | GET/PUT | JWT, `{ success, data }` |
 | api/users/:id | GET | Публичный профиль |
 | api/users/:id/followers, following, follow | GET/POST | как раньше |

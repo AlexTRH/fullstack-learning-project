@@ -3,11 +3,11 @@
  * Prisma implementation of RefreshTokenRepository
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import { RefreshTokenRepository } from '../../domain/interfaces/RefreshTokenRepository.js';
 
 export function createPrismaRefreshTokenRepository(
-  prisma: PrismaClient
+  prisma: PrismaService,
 ): RefreshTokenRepository {
   return {
     async create(token: string, userId: string, expiresAt: Date): Promise<void> {

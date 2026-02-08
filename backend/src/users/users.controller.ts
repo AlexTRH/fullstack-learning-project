@@ -2,9 +2,11 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Put,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -12,12 +14,25 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { updateUserSchema } from './schemas/user.schemas';
+import { updateUserSchema, listUsersQuerySchema } from './schemas/user.schemas';
 
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(@Inject(UsersService) private readonly usersService: UsersService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List users (find people)' })
+  @ApiResponse({ status: 200, description: 'Paginated list of users' })
+  async listUsers(
+    @Query(new ZodValidationPipe(listUsersQuerySchema)) query: { page: number; limit: number; search?: string },
+  ) {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const search = query.search?.trim();
+    const data = await this.usersService.listUsers({ page, limit, search: search || undefined });
+    return { success: true, data };
+  }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)

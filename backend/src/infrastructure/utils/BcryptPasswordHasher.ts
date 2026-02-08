@@ -3,7 +3,6 @@
  * bcryptjs implementation of PasswordHasher
  */
 
-// @ts-ignore - bcryptjs default export works at runtime
 import bcrypt from 'bcryptjs';
 import { PasswordHasher } from '../../domain/interfaces/PasswordHasher.js';
 

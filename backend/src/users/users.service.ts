@@ -7,6 +7,7 @@ import type { UserRepository } from '../domain/interfaces/UserRepository';
 import type { FollowRepository } from '../domain/interfaces/FollowRepository';
 import { getMeUseCase } from '../application/use-cases/users/GetMeUseCase';
 import { getUserByIdUseCase } from '../application/use-cases/users/GetUserByIdUseCase';
+import { listUsersUseCase } from '../application/use-cases/users/ListUsersUseCase';
 import { updateUserUseCase } from '../application/use-cases/users/UpdateUserUseCase';
 import { getFollowersUseCase } from '../application/use-cases/follows/GetFollowersUseCase';
 import { getFollowingUseCase } from '../application/use-cases/follows/GetFollowingUseCase';
@@ -24,6 +25,14 @@ export class UsersService {
 
   async getMe(userId: string): Promise<UserWithCounts> {
     return getMeUseCase({ userId }, { userRepository: this.userRepository });
+  }
+
+  async listUsers(params: {
+    page: number;
+    limit: number;
+    search?: string;
+  }): Promise<{ users: UserPublicData[]; total: number; page: number; limit: number }> {
+    return listUsersUseCase(params, { userRepository: this.userRepository });
   }
 
   async getUserById(userId: string): Promise<UserPublicData> {
