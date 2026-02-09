@@ -4,14 +4,14 @@
  */
 
 import type { User as PrismaUser } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service.js';
-import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User.js';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User';
 import {
   ListUsersPublicParams,
   ListUsersPublicResult,
   UserRepository,
   UserWithPassword,
-} from '../../domain/interfaces/UserRepository.js';
+} from '../../domain/interfaces/UserRepository';
 
 export function createPrismaUserRepository(prisma: PrismaService): UserRepository {
   return {

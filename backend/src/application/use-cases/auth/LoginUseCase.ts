@@ -3,12 +3,12 @@
  * Login user
  */
 
-import { AuthResult } from '../../../domain/entities/Auth.js';
-import { UserRepository } from '../../../domain/interfaces/UserRepository.js';
-import { PasswordHasher } from '../../../domain/interfaces/PasswordHasher.js';
-import { TokenService } from '../../../domain/interfaces/TokenService.js';
-import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository.js';
-import { AppError } from '../../../infrastructure/config/errors.js';
+import { AuthResult } from '../../../domain/entities/Auth';
+import { UserRepository } from '../../../domain/interfaces/UserRepository';
+import { PasswordHasher } from '../../../domain/interfaces/PasswordHasher';
+import { TokenService } from '../../../domain/interfaces/TokenService';
+import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository';
+import { AppError } from '../../../infrastructure/config/errors';
 
 export interface LoginUseCaseInput {
   email: string;

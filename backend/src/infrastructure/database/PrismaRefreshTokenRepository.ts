@@ -3,8 +3,8 @@
  * Prisma implementation of RefreshTokenRepository
  */
 
-import { PrismaService } from '../../prisma/prisma.service.js';
-import { RefreshTokenRepository } from '../../domain/interfaces/RefreshTokenRepository.js';
+import { PrismaService } from '../../prisma/prisma.service';
+import { RefreshTokenRepository } from '../../domain/interfaces/RefreshTokenRepository';
 
 export function createPrismaRefreshTokenRepository(
   prisma: PrismaService,

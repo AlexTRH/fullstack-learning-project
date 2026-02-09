@@ -3,7 +3,7 @@
  * Defines the contract for JWT token operations
  */
 
-import { TokenPayload } from '../entities/Auth.js';
+import { TokenPayload } from '../entities/Auth';
 
 export interface TokenService {
   generateAccessToken(payload: TokenPayload): string;
