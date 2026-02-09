@@ -1,6 +1,5 @@
 /**
- * Presentation: Validators
- * Zod schemas for validating user-related request bodies and query params
+ * Users module: Zod schemas for request body and query validation (presentation layer).
  */
 
 import { z } from 'zod';

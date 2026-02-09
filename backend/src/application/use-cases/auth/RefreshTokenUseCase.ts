@@ -3,9 +3,9 @@
  * Refresh access token
  */
 
-import { TokenService } from '../../../domain/interfaces/TokenService.js';
-import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository.js';
-import { AppError } from '../../../infrastructure/config/errors.js';
+import { TokenService } from '../../../domain/interfaces/TokenService';
+import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository';
+import { AppError } from '../../../infrastructure/config/errors';
 
 export interface RefreshTokenUseCaseInput {
   refreshToken: string;
@@ -28,7 +28,7 @@ export async function refreshTokenUseCase(
   let payload;
   try {
     payload = tokenService.verifyRefreshToken(input.refreshToken);
-  } catch (error) {
+  } catch {
     throw new AppError('Invalid or expired refresh token', 401);
   }
 

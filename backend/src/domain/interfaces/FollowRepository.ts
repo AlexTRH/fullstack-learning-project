@@ -3,8 +3,8 @@
  * Defines the contract for follow relationship data access
  */
 
-import { CreateFollowData, Follow } from '../entities/Follow.js';
-import { UserPublicData } from '../entities/User.js';
+import { CreateFollowData, Follow } from '../entities/Follow';
+import { UserPublicData } from '../entities/User';
 
 export interface FollowRepository {
   create(data: CreateFollowData): Promise<Follow>;

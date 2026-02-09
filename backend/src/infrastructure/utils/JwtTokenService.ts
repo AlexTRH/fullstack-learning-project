@@ -4,8 +4,8 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { TokenPayload } from '../../domain/entities/Auth.js';
-import { TokenService } from '../../domain/interfaces/TokenService.js';
+import { TokenPayload } from '../../domain/entities/Auth';
+import { TokenService } from '../../domain/interfaces/TokenService';
 
 if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
   throw new Error(

@@ -1,6 +1,5 @@
 /**
- * Presentation: Validators
- * Zod schemas for authentication validation
+ * Auth module: Zod schemas for request body validation (presentation layer).
  */
 
 import { z } from 'zod';

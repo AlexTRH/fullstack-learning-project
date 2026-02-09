@@ -5,17 +5,15 @@
 ```
 HTTP Request
     ↓
-Express Server (server.ts)
+NestJS (main.ts)
     ↓
-Routes (routes/authRoutes.ts) - определяет пути
+AuthModule → AuthController - пути и обработчики
     ↓
-Middleware (validate, authenticate) - валидация и проверка токена
+ZodValidationPipe, JwtAuthGuard - валидация и проверка токена
     ↓
-Controller (controllers/authController.ts) - бизнес-логика
+AuthService - вызов use cases
     ↓
-Utils (jwt.ts, bcrypt.ts) - работа с токенами и паролями
-    ↓
-Prisma Client (lib/prisma.ts) - запросы к БД
+Infrastructure (jwt, bcrypt, PrismaService) - токены, пароли, БД
     ↓
 PostgreSQL (Docker)
 ```
@@ -24,29 +22,29 @@ PostgreSQL (Docker)
 
 ## 📋 Компоненты системы
 
-### 1. **Routes** (`routes/authRoutes.ts`)
+### 1. **AuthController** (NestJS)
 
-**Назначение:** Определяет URL пути и подключает middleware/контроллеры
+**Назначение:** Определяет URL пути; валидация и защита через декораторы и pipes/guards
 
 ```typescript
-router.post("/register", validate(registerSchema), register);
-router.post("/login", validate(loginSchema), login);
-router.post("/refresh", validate(refreshTokenSchema), refresh);
-router.post("/logout", authenticate, logout);
+@Post('register') @UsePipes(ZodValidationPipe(registerSchema)) → register
+@Post('login') @UsePipes(ZodValidationPipe(loginSchema)) → login
+@Post('refresh') @UsePipes(ZodValidationPipe(refreshTokenSchema)) → refresh
+@Post('logout') @UseGuards(JwtAuthGuard) → logout
 ```
 
 **Что происходит:**
 
-- `POST /api/auth/register` → валидация → контроллер `register`
-- `POST /api/auth/login` → валидация → контроллер `login`
-- `POST /api/auth/refresh` → валидация → контроллер `refresh`
-- `POST /api/auth/logout` → проверка токена → контроллер `logout`
+- `POST api/auth/register` → ZodValidationPipe → AuthService.register
+- `POST api/auth/login` → ZodValidationPipe → AuthService.login
+- `POST api/auth/refresh` → ZodValidationPipe → AuthService.refresh
+- `POST api/auth/logout` → JwtAuthGuard → AuthService.logout
 
 **Порядок выполнения:**
 
-1. Сначала выполняется `validate()` middleware
-2. Затем `authenticate()` (только для logout)
-3. Потом контроллер
+1. Сначала выполняется ZodValidationPipe (валидация body)
+2. Для logout — JwtAuthGuard (проверка Bearer токена)
+3. Затем вызывается метод AuthService
 
 ---
 
@@ -97,39 +95,13 @@ router.post("/logout", authenticate, logout);
 
 ---
 
-### 3. **Validation Middleware** (`middleware/validate.ts`)
+### 3. **ZodValidationPipe** (NestJS)
 
-**Назначение:** Выполняет валидацию через Zod перед контроллером
+**Назначение:** Выполняет валидацию через Zod перед вызовом обработчика
 
 **Как работает:**
 
-```typescript
-export const validate = (schema: ZodSchema) => {
-  return (req, res, next) => {
-    try {
-      // Парсит body, query, params через Zod схему
-      schema.parse({
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      });
-      next(); // Всё ОК, идём дальше
-    } catch (error) {
-      if (error instanceof ZodError) {
-        // Берём первую ошибку и возвращаем 400
-        next(new AppError(`Validation error: ${errors[0].message}`, 400));
-      }
-    }
-  };
-};
-```
-
-**Что происходит:**
-
-1. Принимает Zod схему
-2. Пытается распарсить `req.body`, `req.query`, `req.params`
-3. Если ошибка → возвращает 400 с сообщением
-4. Если ОК → вызывает `next()` для перехода к контроллеру
+В Nest используется кастомный pipe, который парсит body/query/params через Zod-схему. При ошибке возвращается 400 с сообщением в формате `Validation error: ${first.message}` (как раньше в Express).
 
 **Пример ошибки:**
 
@@ -142,55 +114,17 @@ export const validate = (schema: ZodSchema) => {
 
 ---
 
-### 4. **Auth Middleware** (`middleware/auth.ts`)
+### 4. **JwtAuthGuard** (NestJS)
 
-**Назначение:** Проверяет JWT токен и добавляет `userId` в запрос
+**Назначение:** Проверяет JWT токен и добавляет пользователя в запрос (request.user)
 
 **Как работает:**
 
-```typescript
-export const authenticate = (req: AuthRequest, res, next) => {
-  // 1. Извлекает заголовок Authorization
-  const authHeader = req.headers.authorization;
-
-  // 2. Проверяет формат "Bearer <token>"
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new AppError("No token provided", 401);
-  }
-
-  // 3. Извлекает токен (убирает "Bearer ")
-  const token = authHeader.substring(7);
-
-  // 4. Проверяет и декодирует токен
-  const payload = verifyAccessToken(token);
-
-  // 5. Добавляет userId и email в req
-  req.userId = payload.userId;
-  req.userEmail = payload.email;
-
-  // 6. Переходит к контроллеру
-  next();
-};
-```
-
-**Что добавляется в `req`:**
-
-- `req.userId` - ID пользователя из токена
-- `req.userEmail` - email пользователя из токена
-
-**Тип `AuthRequest`:**
-
-```typescript
-interface AuthRequest extends Request {
-  userId?: string;
-  userEmail?: string;
-}
-```
+Guard извлекает заголовок Authorization, проверяет формат "Bearer &lt;token&gt;", верифицирует токен и записывает payload в `request.user` (userId, email). Доступ в контроллере — через декоратор `@CurrentUser()`.
 
 **Ошибки:**
 
 - Нет заголовка → `401: No token provided`
-- Неверный формат → `401: No token provided`
 - Неверный/истёкший токен → `401: Invalid or expired token`
 
 ---
@@ -288,35 +222,11 @@ $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 
 ---
 
-### 7. **Error Handler** (`middleware/errorHandler.ts`)
+### 7. **HttpExceptionFilter** (NestJS)
 
 **Назначение:** Централизованная обработка ошибок
 
-#### `AppError` класс
-
-```typescript
-class AppError extends Error {
-  statusCode: number; // HTTP статус код
-  isOperational: boolean; // Операционная ошибка (не баг)
-}
-```
-
-#### `errorHandler` middleware
-
-```typescript
-// Если AppError → возвращает статус код из ошибки
-// Если другая ошибка → возвращает 500
-// В production скрывает детали внутренних ошибок
-```
-
-**Формат ответа:**
-
-```json
-{
-  "success": false,
-  "message": "Error message"
-}
-```
+В Nest глобальный фильтр перехватывает AppError и HttpException, возвращает статус и тело в формате `{ success: false, message }`. В production детали внутренних ошибок не раскрываются.
 
 ---
 
@@ -329,20 +239,19 @@ class AppError extends Error {
    POST /api/auth/register
    Body: { email, username, password, name }
 
-2. Express Server
-   → Принимает запрос
-   → Парсит JSON body
+2. Nest (main.ts)
+   → Принимает запрос, парсит JSON body
 
-3. Routes (authRoutes.ts)
-   → Находит роут /register
-   → Вызывает validate(registerSchema)
+3. AuthController
+   → Роут POST api/auth/register
+   → ZodValidationPipe(registerSchema)
 
-4. Validation Middleware
+4. ZodValidationPipe
    → Проверяет данные через Zod
    → Если ошибка → 400 Bad Request
-   → Если ОК → next() к контроллеру
+   → Если ОК → вызов обработчика
 
-5. Controller (register)
+5. AuthService.register
    → Извлекает данные из req.body
    → Проверяет существование пользователя:
       prisma.user.findFirst({ OR: [{ email }, { username }] })
@@ -445,13 +354,12 @@ class AppError extends Error {
    Headers: { Authorization: "Bearer <access_token>" }
    Body: { refreshToken: "..." }
 
-2. Auth Middleware (authenticate)
+2. JwtAuthGuard
    → Извлекает токен из заголовка
-   → Проверяет токен: verifyAccessToken(token)
-   → Добавляет req.userId и req.userEmail
+   → Проверяет токен, записывает user в request
    → Если ошибка → 401
 
-3. Controller (logout)
+3. AuthService.logout
    → Удаляет refresh token из БД:
       prisma.refreshToken.deleteMany({ where: { token } })
    → Возвращает успех
@@ -623,7 +531,7 @@ SELECT * FROM refresh_tokens WHERE "expiresAt" < NOW(); -- истёкшие
 
 После аутентификации можно:
 
-1. Использовать `authenticate` middleware для защищённых роутов
-2. Получать `req.userId` в контроллерах
+1. Использовать `JwtAuthGuard` для защищённых роутов
+2. Получать пользователя через `@CurrentUser()` в контроллерах
 3. Реализовать USER/PROFILE endpoints
 4. Реализовать POSTS endpoints (с привязкой к пользователю)

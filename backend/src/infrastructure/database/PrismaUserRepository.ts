@@ -3,16 +3,17 @@
  * Prisma implementation of UserRepository
  */
 
-import { PrismaClient } from '@prisma/client';
-import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User.js';
+import type { User as PrismaUser } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../../domain/entities/User';
 import {
   ListUsersPublicParams,
   ListUsersPublicResult,
   UserRepository,
   UserWithPassword,
-} from '../../domain/interfaces/UserRepository.js';
+} from '../../domain/interfaces/UserRepository';
 
-export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
+export function createPrismaUserRepository(prisma: PrismaService): UserRepository {
   return {
     async findByEmail(email: string): Promise<User | null> {
       const user = await prisma.user.findUnique({
@@ -214,7 +215,7 @@ export function createPrismaUserRepository(prisma: PrismaClient): UserRepository
   };
 }
 
-function mapToDomainUser(prismaUser: any): User {
+function mapToDomainUser(prismaUser: PrismaUser): User {
   return {
     id: prismaUser.id,
     email: prismaUser.email,

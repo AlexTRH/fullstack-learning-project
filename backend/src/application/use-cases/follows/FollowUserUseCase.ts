@@ -3,9 +3,9 @@
  * Follow a user
  */
 
-import { FollowRepository } from '../../../domain/interfaces/FollowRepository.js';
-import { UserRepository } from '../../../domain/interfaces/UserRepository.js';
-import { AppError } from '../../../infrastructure/config/errors.js';
+import { FollowRepository } from '../../../domain/interfaces/FollowRepository';
+import { UserRepository } from '../../../domain/interfaces/UserRepository';
+import { AppError } from '../../../infrastructure/config/errors';
 
 export interface FollowUserUseCaseInput {
   followerId: string;
