@@ -4,7 +4,7 @@
 
 This is a fullstack social media application built with:
 
-- **Backend**: Node.js + Express + TypeScript + Prisma + PostgreSQL
+- **Backend**: Node.js + NestJS + TypeScript + Prisma + PostgreSQL
 - **Frontend**: Next.js 16 (App Router) + TypeScript + TanStack Query + Zustand + shadcn/ui
 - **Package Manager**: pnpm
 - **Architecture**: Monorepo structure
@@ -38,70 +38,61 @@ This is a fullstack social media application built with:
 - Validate JWT tokens on every protected route
 - Hash passwords with bcrypt (minimum 10 rounds)
 
-## Backend Rules
+## Backend Rules (NestJS)
 
 ### Structure
 
 ```
 backend/
 ├── src/
-│   ├── controllers/    # Request handlers (business logic)
-│   ├── routes/         # Route definitions
-│   ├── middleware/     # Express middleware
-│   ├── utils/          # Utility functions
-│   ├── validators/     # Zod schemas
-│   ├── lib/            # Third-party libs (Prisma, etc.)
-│   └── server.ts       # Entry point
+│   ├── app.module.ts       # Root module
+│   ├── main.ts             # Bootstrap (NestFactory)
+│   ├── application/        # Use cases (pure functions, no framework)
+│   │   └── use-cases/
+│   ├── domain/             # Entities + repository/service interfaces
+│   │   ├── entities/
+│   │   └── interfaces/
+│   ├── infrastructure/     # Implementations (Prisma, bcrypt, JWT)
+│   │   ├── database/       # *Repository.ts (Prisma*Repository)
+│   │   ├── config/         # errors.ts, etc.
+│   │   └── utils/          # BcryptPasswordHasher, JwtTokenService
+│   ├── common/             # Guards, Pipes, Filters, Decorators
+│   ├── prisma/             # PrismaModule, PrismaService
+│   ├── auth/               # AuthModule, AuthController, AuthService, schemas
+│   └── users/              # UsersModule, UsersController, UsersService, schemas
 └── prisma/
-    └── schema.prisma   # Database schema
+    └── schema.prisma
 ```
 
-### Express Best Practices
+### NestJS Best Practices
 
-- Use async/await, never use callbacks
-- Always use `next()` in middleware to pass errors to error handler
-- Use `express.json()` and `express.urlencoded()` for body parsing
-- Implement CORS properly with credentials support
-- Use Helmet for security headers
-- Use compression middleware for production
+- Use dependency injection: inject services and repositories via constructor
+- Use `@Injectable()` for services; use case functions receive dependencies from service constructors
+- Use `ZodValidationPipe` with Zod schemas for DTO validation (schemas in `*/schemas/*.ts`)
+- Use `JwtAuthGuard` for protected routes and `@CurrentUser()` decorator for `userId`
+- Use `HttpExceptionFilter` for consistent error responses
+- Use `@ApiTags()`, `@ApiOperation()`, `@ApiResponse()`, `@ApiBearerAuth()` for Swagger
+- Keep `main.ts` minimal: create app, global pipes/filters, Swagger, listen
 
 ### Controllers (Presentation Layer)
 
-- Controllers are **thin** - only handle HTTP concerns
-- **Never** put business logic in controllers - delegate to use cases
-- Always use `async (req, res, next)` signature
-- Use `next(error)` to pass errors to error handler
-- Return consistent response format: `{ success: boolean, data?: T, message?: string }`
-- Use `AuthRequest` type for authenticated routes (extends Request with userId)
-- Import use cases from `application/use-cases/`
-- Import dependencies from `infrastructure/dependencies.ts`
-
-### Validation (Presentation Layer)
-
-- Always validate input with Zod schemas in `presentation/validators/`
-- Use `validate()` middleware before controllers
-- Validate: email format, password strength, string lengths, required fields
-- Return clear validation error messages
-- Validation schemas are in `presentation/validators/`
+- Controllers are **thin** - only handle HTTP (params, query, body) and call service/use case
+- **Never** put business logic in controllers - delegate to service or use case
+- Return consistent format: `{ success: true, data: T }` or throw via filter
+- Use `@Controller('api/...')`, `@Get()`, `@Post()`, `@Put()`, `@Delete()` with proper decorators
+- Use `@UseGuards(JwtAuthGuard)` and `@ApiBearerAuth()` for protected routes
+- Use `@Body(new ZodValidationPipe(schema))` for validated body; query/params similarly
+- Services inject repositories (from InfrastructureModule) and call use cases with those deps
 
 ### Use Cases (Application Layer)
 
-- **All business logic goes in use cases**, not controllers
-- Use cases are pure functions that take input and dependencies
-- Dependencies are injected (from `infrastructure/dependencies.ts`)
-- Use cases should be testable in isolation
+- **All business logic goes in use cases**, not controllers or services
+- Use cases are pure functions: `(input, dependencies) => Promise<output>`
+- Services inject repositories (from Nest DI) and pass them into use cases as `dependencies`
+- Use cases should be testable in isolation (mock dependencies)
 - One use case = one business operation
-- Use cases call domain interfaces, not infrastructure directly
-- Example structure:
-
-  ```typescript
-  export async function useCaseName(
-    input: UseCaseInput,
-    dependencies: { repository: Repository; service: Service }
-  ): Promise<UseCaseOutput> {
-    // Business logic here
-  }
-  ```
+- Use cases depend only on domain interfaces, not Nest or Prisma
+- Example: `listUsersUseCase(params, { userRepository })`; service gets `userRepository` from DI and calls the use case
 
 ### Domain Layer
 
@@ -112,33 +103,27 @@ backend/
 
 ### Infrastructure Layer
 
-- **Repositories**: Implement domain repository interfaces using Prisma
-- **Services**: Implement domain service interfaces (JWT, bcrypt, etc.)
-- **Dependencies**: Centralized dependency injection in `dependencies.ts`
-- All infrastructure implementations are created via factory functions
-- Example: `createPrismaUserRepository(prisma)` returns `UserRepository`
+- **Repositories**: Implement domain repository interfaces (e.g. `PrismaUserRepository`). Created via factory `createPrismaUserRepository(prisma)`; registered in `InfrastructureModule` and injected where needed.
+- **Services**: Nest services (AuthService, UsersService) orchestrate use cases; they inject repositories and optional TokenService/PasswordHasher from InfrastructureModule.
+- **Prisma**: Use `PrismaService` (from `prisma/prisma.service`) injected into repository factories in InfrastructureModule.
+- Domain service interfaces (TokenService, PasswordHasher) are implemented in `infrastructure/utils/` and provided by InfrastructureModule.
 
 ### Database (Prisma)
 
-- Always use Prisma Client from `infrastructure/database/prisma.ts` (singleton)
-- Repositories are in `infrastructure/database/`
-- Use transactions for multi-step operations
-- Use `select` to fetch only needed fields
-- Use `include` for relations, but be mindful of N+1 queries
-- Always handle unique constraint violations (email, username)
-- Use soft deletes with `isDeleted` flag when appropriate
-- Add indexes for frequently queried fields
-- Use `onDelete: Cascade` for cascading deletes
-- Map Prisma models to domain entities in repositories
+- Use `PrismaService` (extends PrismaClient) injected from PrismaModule; repositories receive it in their factory.
+- Repositories live in `infrastructure/database/` (e.g. `PrismaUserRepository.ts`).
+- Use transactions via `this.prisma.$transaction()` when needed.
+- Use `select` to fetch only needed fields; `include` for relations (avoid N+1).
+- Handle unique constraint violations (email, username) and map to AppError/409.
+- Add indexes in schema for frequently queried fields; use `onDelete: Cascade` where appropriate.
+- Map Prisma results to domain entities inside repositories.
 
 ### Authentication & Authorization
 
-- Use JWT with access tokens (15m) and refresh tokens (30d)
-- Store refresh tokens in database
-- Always verify tokens in `authenticate` middleware
-- Use `authenticate` middleware for protected routes
-- Check user permissions for admin/moderator actions
-- Invalidate refresh tokens on logout
+- JWT: access tokens (short-lived) and refresh tokens (stored in DB, longer-lived).
+- Use `JwtAuthGuard` on protected routes; use `@CurrentUser()` to get `{ userId }`.
+- Implement logout by invalidating refresh token (AuthService calls RefreshTokenRepository).
+- Check resource ownership in use case or service before update/delete (e.g. only author can edit post).
 
 ### API Design
 
@@ -355,51 +340,52 @@ Before submitting code:
 
 ## Common Patterns
 
-### Backend Clean Architecture Patterns
+### Backend Clean Architecture Patterns (NestJS)
 
-**Controller Pattern (Presentation Layer):**
+**Controller (thin, delegates to service):**
 
 ```typescript
-// presentation/controllers/userController.ts
-import { getMeUseCase } from '../../application/use-cases/users/GetMeUseCase.js';
-import { dependencies } from '../../infrastructure/dependencies.js';
+// users/users.controller.ts
+@Controller('api/users')
+export class UsersController {
+  constructor(@Inject(UsersService) private readonly usersService: UsersService) {}
 
-export const getMe = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const user = await getMeUseCase({ userId: req.userId! }, dependencies);
-    res.json({ success: true, data: user });
-  } catch (error) {
-    next(error);
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getMe(@CurrentUser() user: { userId: string }) {
+    const data = await this.usersService.getMe(user.userId);
+    return { success: true, data };
   }
-};
+}
 ```
 
-**Use Case Pattern (Application Layer):**
+**Service (injects repositories, calls use cases):**
+
+```typescript
+// users/users.service.ts — injects UserRepository, calls getMeUseCase({ userId }, { userRepository })
+const user = await getMeUseCase({ userId }, { userRepository: this.userRepository });
+```
+
+**Use Case (application layer, pure function):**
 
 ```typescript
 // application/use-cases/users/GetMeUseCase.ts
-import { UserRepository } from '../../domain/interfaces/UserRepository.js';
-import { AppError } from '../../infrastructure/config/errors.js';
-
 export async function getMeUseCase(
   input: { userId: string },
   dependencies: { userRepository: UserRepository }
 ) {
-  const user = await dependencies.userRepository.findById(input.userId);
+  const user = await dependencies.userRepository.findByIdWithCounts(input.userId);
   if (!user) throw new AppError('User not found', 404);
   return user;
 }
 ```
 
-**Repository Pattern (Infrastructure Layer):**
+**Repository (infrastructure, PrismaService):**
 
 ```typescript
 // infrastructure/database/PrismaUserRepository.ts
-export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
+export function createPrismaUserRepository(prisma: PrismaService): UserRepository {
   return {
     async findById(id: string): Promise<User | null> {
       const user = await prisma.user.findUnique({ where: { id } });
@@ -447,7 +433,7 @@ export const useCreatePost = () => {
 - ❌ Don't skip error handling
 - ❌ Don't create circular dependencies
 - ❌ **Don't put business logic in controllers** - use use cases
-- ❌ **Don't import infrastructure directly in use cases** - use dependency injection
+- ❌ **Don't import infrastructure or Nest in use cases** - use dependency injection (repositories passed in)
 - ❌ **Don't put domain logic in infrastructure** - keep it in domain/application
 - ❌ **Don't create dependencies from domain to infrastructure** - dependencies flow inward
 - ❌ **Don't await independent async operations sequentially** - use Promise.all() or parallel Server Components
