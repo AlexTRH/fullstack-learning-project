@@ -123,6 +123,29 @@ function mapToPost(row: { id: string; content: string; authorId: string; attachm
   };
 }
 
+/** Prisma User.followers = who I follow, User.following = who follows me. Domain expects the opposite. */
+function mapAuthorCounts(
+  author: {
+    id: string;
+    username: string;
+    name: string | null;
+    avatar: string | null;
+    bio: string | null;
+    isVerified: boolean;
+    createdAt: Date;
+    _count: { posts: number; followers: number; following: number };
+  },
+): UserPublicData {
+  return {
+    ...author,
+    _count: {
+      posts: author._count.posts,
+      followers: author._count.following,
+      following: author._count.followers,
+    },
+  };
+}
+
 function mapToPostWithAuthor(
   row: {
     id: string;
@@ -146,6 +169,6 @@ function mapToPostWithAuthor(
 ): PostWithAuthor {
   return {
     ...mapToPost(row),
-    author: row.author as UserPublicData,
+    author: mapAuthorCounts(row.author),
   };
 }

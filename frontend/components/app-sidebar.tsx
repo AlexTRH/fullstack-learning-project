@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, LayoutDashboard, Settings } from "lucide-react";
+import { Home, Users, LayoutDashboard, Settings, Newspaper } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
   Sidebar,
@@ -19,6 +19,7 @@ import {
 
 const navMain = [
   { title: "Home", href: "/", icon: Home },
+  { title: "Feed", href: "/posts", icon: Newspaper },
   { title: "People", href: "/people", icon: Users },
 ];
 

@@ -17,9 +17,11 @@ import { getInitials } from "../utils";
 type ProfileCardProps = {
   profile: GetMeResponse;
   onLogout: () => void;
+  onFollowersClick?: () => void;
+  onFollowingClick?: () => void;
 };
 
-export function ProfileCard({ profile, onLogout }: ProfileCardProps) {
+export function ProfileCard({ profile, onLogout, onFollowersClick, onFollowingClick }: ProfileCardProps) {
   const displayName = profile.name?.trim() || profile.username;
   const initials = getInitials(profile.name, profile.username);
 
@@ -58,13 +60,51 @@ export function ProfileCard({ profile, onLogout }: ProfileCardProps) {
             <p className="text-2xl font-semibold">{profile._count.posts}</p>
             <p className="text-xs text-muted-foreground">Posts</p>
           </div>
-          <div>
+          <div
+            role={onFollowersClick ? "button" : undefined}
+            tabIndex={onFollowersClick ? 0 : undefined}
+            onClick={onFollowersClick}
+            onKeyDown={
+              onFollowersClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onFollowersClick();
+                    }
+                  }
+                : undefined
+            }
+            className={
+              onFollowersClick
+                ? "cursor-pointer rounded-md transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+                : undefined
+            }
+          >
             <p className="text-2xl font-semibold">
               {profile._count.followers}
             </p>
             <p className="text-xs text-muted-foreground">Followers</p>
           </div>
-          <div>
+          <div
+            role={onFollowingClick ? "button" : undefined}
+            tabIndex={onFollowingClick ? 0 : undefined}
+            onClick={onFollowingClick}
+            onKeyDown={
+              onFollowingClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onFollowingClick();
+                    }
+                  }
+                : undefined
+            }
+            className={
+              onFollowingClick
+                ? "cursor-pointer rounded-md transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring"
+                : undefined
+            }
+          >
             <p className="text-2xl font-semibold">
               {profile._count.following}
             </p>
@@ -73,9 +113,6 @@ export function ProfileCard({ profile, onLogout }: ProfileCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-wrap justify-center gap-2 border-t pt-6">
-        <Button variant="outline" asChild>
-          <Link href={`/users/${profile.id}`}>Public profile</Link>
-        </Button>
         <Button variant="outline" asChild>
           <Link href="/dashboard/settings">Edit profile</Link>
         </Button>

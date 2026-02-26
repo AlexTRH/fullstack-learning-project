@@ -70,7 +70,7 @@ const Sidebar = ({
       <aside
         data-sidebar="sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-svh w-[var(--sidebar-width)] flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] transition-transform duration-200 ease-linear md:relative md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex h-svh w-[var(--sidebar-width)] flex-col bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] transition-transform duration-200 ease-linear md:relative md:translate-x-0",
           isMobile && !open && "-translate-x-full",
           className
         )}
@@ -89,7 +89,7 @@ const SidebarHeader = ({
 }: React.ComponentProps<"div">) => (
   <div
     data-sidebar="header"
-    className={cn("flex h-14 shrink-0 items-center gap-2 border-b border-[hsl(var(--sidebar-border))] px-4", className)}
+    className={cn("flex h-14 shrink-0 items-center gap-2 px-4", className)}
     {...props}
   />
 );
@@ -160,9 +160,9 @@ const SidebarMenuButton = React.forwardRef<
   React.ComponentProps<"a"> & { isActive?: boolean; asChild?: boolean }
 >(({ className, isActive, asChild, children, ...props }, ref) => {
   const classes = cn(
-    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]",
+    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]",
     isActive &&
-      "bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]",
+      "bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-primary))] font-semibold",
     className
   );
   if (asChild && React.isValidElement(children)) {
@@ -191,7 +191,7 @@ const SidebarFooter = ({
   <div
     data-sidebar="footer"
     className={cn(
-      "mt-auto shrink-0 border-t border-[hsl(var(--sidebar-border))] p-2",
+      "mt-auto shrink-0 p-2",
       className
     )}
     {...props}

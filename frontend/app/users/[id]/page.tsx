@@ -1,13 +1,15 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchUserById, fetchFollowers, fetchFollowing } from "@/features/profile/api";
 import { UserProfileCard } from "@/features/profile/components/UserProfileCard";
 import { UserListItem } from "@/features/profile/components/UserListItem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const PAGE_LAYOUT_CLASS =
   "flex min-h-svh w-full items-center justify-center p-page md:p-page-md";
@@ -18,12 +20,23 @@ type PageProps = { params: Promise<{ id: string }> };
 
 export default function UserProfilePage({ params }: PageProps) {
   const { id } = use(params);
+  const router = useRouter();
+  const currentUserId = useAuthStore((s) => s.user?.id ?? null);
   const [openList, setOpenList] = useState<OpenList>(null);
+
+  useEffect(() => {
+    if (currentUserId && id === currentUserId) {
+      router.replace("/dashboard");
+    }
+  }, [currentUserId, id, router]);
+
+  const isOwnProfile = currentUserId !== null && id === currentUserId;
 
   const { data: user, isLoading, isError, error } = useQuery({
     queryKey: ["user", id],
     queryFn: () => fetchUserById(id),
     retry: false,
+    enabled: !isOwnProfile,
   });
 
   const { data: followers = [], isLoading: isLoadingFollowers } = useQuery({
@@ -37,6 +50,8 @@ export default function UserProfilePage({ params }: PageProps) {
     queryFn: () => fetchFollowing(id),
     enabled: !!user && openList === "following",
   });
+
+  if (isOwnProfile) return null;
 
   if (isLoading) {
     return (
@@ -123,7 +138,15 @@ export default function UserProfilePage({ params }: PageProps) {
               <ul className="space-y-2">
                 {list.map((u) => (
                   <li key={u.id}>
-                    <UserListItem user={u} profileUserId={id} />
+                    <UserListItem
+                      user={u}
+                      profileUserId={id}
+                      initialIsFollowing={
+                        openList === "following" && id === currentUserId
+                          ? true
+                          : undefined
+                      }
+                    />
                   </li>
                 ))}
               </ul>
