@@ -9,6 +9,7 @@ import { fetchMe } from "@/features/profile/api";
 import { EditProfileForm } from "@/features/profile/components/EditProfileForm";
 import { ProfileCardLoading } from "@/features/profile/components/ProfileCardLoading";
 import { ProfileCardError } from "@/features/profile/components/ProfileCardError";
+import { ThemeSwitcher } from "@/features/settings/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 
 const PAGE_LAYOUT_CLASS =
@@ -46,6 +47,7 @@ export default function DashboardSettingsPage() {
             onSignInAgain={() => router.push("/login")}
           />
         )}
+        <ThemeSwitcher />
         {profile && <EditProfileForm profile={profile} />}
       </div>
     </div>

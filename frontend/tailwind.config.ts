@@ -44,6 +44,7 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        header: "hsl(var(--header-bg))",
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -56,6 +57,7 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        pill: "var(--radius-button)",
       },
       maxWidth: {
         "content": "var(--content-max-width)",
@@ -64,6 +66,9 @@ const config: Config = {
       spacing: {
         "page": "var(--page-padding)",
         "page-md": "var(--page-padding-md)",
+      },
+      boxShadow: {
+        card: "var(--shadow-card)",
       },
     },
   },

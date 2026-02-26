@@ -17,13 +17,17 @@ type UserListItemProps = {
   user: UserPublicResponse;
   /** ID of the profile page we're on (to invalidate followers/following lists after toggle) */
   profileUserId?: string;
+  /** When true (e.g. in "Following" list on own profile), show Unfollow without asking API */
+  initialIsFollowing?: boolean;
 };
 
-export function UserListItem({ user, profileUserId }: UserListItemProps) {
+export function UserListItem({ user, profileUserId, initialIsFollowing }: UserListItemProps) {
   const queryClient = useQueryClient();
   const currentUserId = useAuthStore((s) => s.user?.id ?? null);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
+  const [isFollowing, setIsFollowing] = useState<boolean | null>(
+    initialIsFollowing !== undefined ? initialIsFollowing : null
+  );
 
   const followMutation = useMutation({
     mutationFn: () => toggleFollow(user.id),
@@ -79,7 +83,7 @@ export function UserListItem({ user, profileUserId }: UserListItemProps) {
           >
             {followMutation.isPending
               ? "..."
-              : isFollowing === true
+              : (isFollowing ?? initialIsFollowing) === true
                 ? "Unfollow"
                 : "Follow"}
           </Button>

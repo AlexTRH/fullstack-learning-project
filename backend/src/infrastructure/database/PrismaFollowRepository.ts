@@ -74,7 +74,7 @@ export function createPrismaFollowRepository(prisma: PrismaService): FollowRepos
         orderBy: { createdAt: 'desc' },
       });
 
-      return follows.map((follow) => follow.follower as UserPublicData);
+      return follows.map((follow) => mapUserCountsToDomain(follow.follower));
     },
 
     async findFollowing(userId: string): Promise<UserPublicData[]> {
@@ -103,7 +103,7 @@ export function createPrismaFollowRepository(prisma: PrismaService): FollowRepos
         orderBy: { createdAt: 'desc' },
       });
 
-      return follows.map((follow) => follow.following as UserPublicData);
+      return follows.map((follow) => mapUserCountsToDomain(follow.following));
     },
 
     async countFollowers(userId: string): Promise<number> {
@@ -116,6 +116,29 @@ export function createPrismaFollowRepository(prisma: PrismaService): FollowRepos
       return prisma.follow.count({
         where: { followerId: userId },
       });
+    },
+  };
+}
+
+/** Prisma User relation names: followers = who I follow, following = who follows me. Domain expects the opposite. */
+function mapUserCountsToDomain(
+  row: {
+    id: string;
+    username: string;
+    name: string | null;
+    avatar: string | null;
+    bio: string | null;
+    isVerified: boolean;
+    createdAt: Date;
+    _count: { posts: number; followers: number; following: number };
+  },
+): UserPublicData {
+  return {
+    ...row,
+    _count: {
+      posts: row._count.posts,
+      followers: row._count.following,
+      following: row._count.followers,
     },
   };
 }

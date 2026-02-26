@@ -105,7 +105,7 @@ export function createPrismaUserRepository(prisma: PrismaService): UserRepositor
 
       if (!user) return null;
 
-      return user as UserWithCounts;
+      return mapUserWithCounts(user) as UserWithCounts;
     },
 
     async findByIdPublic(id: string): Promise<UserPublicData | null> {
@@ -131,7 +131,7 @@ export function createPrismaUserRepository(prisma: PrismaService): UserRepositor
 
       if (!user) return null;
 
-      return user as UserPublicData;
+      return mapUserWithCounts(user) as UserPublicData;
     },
 
     async findManyPublic(params: ListUsersPublicParams): Promise<ListUsersPublicResult> {
@@ -172,7 +172,7 @@ export function createPrismaUserRepository(prisma: PrismaService): UserRepositor
       ]);
 
       return {
-        users: users as UserPublicData[],
+        users: users.map((u) => mapUserWithCounts(u) as UserPublicData),
         total,
       };
     },
@@ -211,6 +211,20 @@ export function createPrismaUserRepository(prisma: PrismaService): UserRepositor
       });
 
       return !!user;
+    },
+  };
+}
+
+/** Prisma User.followers = "who I follow", User.following = "who follows me". Domain expects opposite. */
+function mapUserWithCounts<T extends { _count: { posts: number; followers: number; following: number } }>(
+  row: T,
+): Omit<T, '_count'> & { _count: { posts: number; followers: number; following: number } } {
+  return {
+    ...row,
+    _count: {
+      posts: row._count.posts,
+      followers: row._count.following,
+      following: row._count.followers,
     },
   };
 }
