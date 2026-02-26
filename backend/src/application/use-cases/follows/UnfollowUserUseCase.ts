@@ -3,9 +3,9 @@
  * Unfollow a user
  */
 
-import { FollowRepository } from '../../../domain/interfaces/FollowRepository';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { FollowRepository } from '@domain/interfaces/FollowRepository';
+import { UserRepository } from '@domain/interfaces/UserRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface UnfollowUserUseCaseInput {
   followerId: string;

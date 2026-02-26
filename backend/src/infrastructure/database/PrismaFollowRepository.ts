@@ -3,10 +3,10 @@
  * Prisma implementation of FollowRepository
  */
 
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateFollowData, Follow } from '../../domain/entities/Follow';
-import { UserPublicData } from '../../domain/entities/User';
-import { FollowRepository } from '../../domain/interfaces/FollowRepository';
+import { PrismaService } from '@/prisma/prisma.service';
+import { CreateFollowData, Follow } from '@domain/entities/Follow';
+import { UserPublicData } from '@domain/entities/User';
+import { FollowRepository } from '@domain/interfaces/FollowRepository';
 
 export function createPrismaFollowRepository(prisma: PrismaService): FollowRepository {
   return {

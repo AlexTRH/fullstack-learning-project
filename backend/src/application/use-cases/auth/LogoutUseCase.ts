@@ -3,7 +3,7 @@
  * Logout user
  */
 
-import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository';
+import { RefreshTokenRepository } from '@domain/interfaces/RefreshTokenRepository';
 
 export interface LogoutUseCaseInput {
   refreshToken: string;

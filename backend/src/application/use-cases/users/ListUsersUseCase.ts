@@ -3,8 +3,8 @@
  * List users (find people) with pagination and optional search
  */
 
-import { UserPublicData } from '../../../domain/entities/User';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
+import { UserPublicData } from '@domain/entities/User';
+import { UserRepository } from '@domain/interfaces/UserRepository';
 
 export interface ListUsersUseCaseInput {
   page: number;

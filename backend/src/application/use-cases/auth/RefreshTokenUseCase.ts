@@ -3,9 +3,9 @@
  * Refresh access token
  */
 
-import { TokenService } from '../../../domain/interfaces/TokenService';
-import { RefreshTokenRepository } from '../../../domain/interfaces/RefreshTokenRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { TokenService } from '@domain/interfaces/TokenService';
+import { RefreshTokenRepository } from '@domain/interfaces/RefreshTokenRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface RefreshTokenUseCaseInput {
   refreshToken: string;

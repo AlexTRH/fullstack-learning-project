@@ -3,9 +3,9 @@
  * Get current user profile
  */
 
-import { UserWithCounts } from '../../../domain/entities/User';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { UserWithCounts } from '@domain/entities/User';
+import { UserRepository } from '@domain/interfaces/UserRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface GetMeUseCaseInput {
   userId: string;

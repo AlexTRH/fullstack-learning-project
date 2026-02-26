@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AppModule } from '@/app.module';
+import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';

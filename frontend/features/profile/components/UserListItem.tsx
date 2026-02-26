@@ -30,6 +30,10 @@ export function UserListItem({ user, profileUserId }: UserListItemProps) {
     onSuccess: (data) => {
       setIsFollowing(data.isFollowing);
       queryClient.invalidateQueries({ queryKey: ["user", user.id] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      if (currentUserId) {
+        queryClient.invalidateQueries({ queryKey: ["user", currentUserId] });
+      }
       if (profileUserId) {
         queryClient.invalidateQueries({ queryKey: ["user", profileUserId, "followers"] });
         queryClient.invalidateQueries({ queryKey: ["user", profileUserId, "following"] });

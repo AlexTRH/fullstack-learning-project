@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { InfrastructureModule } from './infrastructure/infrastructure.module';
+import { AppController } from '@/app.controller';
+import { AuthModule } from '@/auth/auth.module';
+import { UsersModule } from '@/users/users.module';
+import { PostsModule } from '@/posts/posts.module';
+import { PrismaModule } from '@/prisma/prisma.module';
+import { InfrastructureModule } from '@/infrastructure/infrastructure.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { InfrastructureModule } from './infrastructure/infrastructure.module';
     InfrastructureModule,
     AuthModule,
     UsersModule,
+    PostsModule,
   ],
   controllers: [AppController],
 })

@@ -3,9 +3,9 @@
  * Update authenticated user profile
  */
 
-import { UpdateUserData, User } from '../../../domain/entities/User';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { UpdateUserData, User } from '@domain/entities/User';
+import { UserRepository } from '@domain/interfaces/UserRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface UpdateUserUseCaseInput {
   userId: string;
