@@ -3,9 +3,9 @@
  * Get public user profile by ID
  */
 
-import { UserPublicData } from '../../../domain/entities/User';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { UserPublicData } from '@domain/entities/User';
+import { UserRepository } from '@domain/interfaces/UserRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface GetUserByIdUseCaseInput {
   userId: string;

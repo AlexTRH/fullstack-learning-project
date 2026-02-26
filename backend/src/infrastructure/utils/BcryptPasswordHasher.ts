@@ -4,7 +4,7 @@
  */
 
 import bcrypt from 'bcryptjs';
-import { PasswordHasher } from '../../domain/interfaces/PasswordHasher';
+import { PasswordHasher } from '@domain/interfaces/PasswordHasher';
 
 const SALT_ROUNDS = 10;
 

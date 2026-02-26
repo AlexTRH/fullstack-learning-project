@@ -3,10 +3,10 @@
  * Get list of users that a user is following
  */
 
-import { UserPublicData } from '../../../domain/entities/User';
-import { FollowRepository } from '../../../domain/interfaces/FollowRepository';
-import { UserRepository } from '../../../domain/interfaces/UserRepository';
-import { AppError } from '../../../infrastructure/config/errors';
+import { UserPublicData } from '@domain/entities/User';
+import { FollowRepository } from '@domain/interfaces/FollowRepository';
+import { UserRepository } from '@domain/interfaces/UserRepository';
+import { AppError } from '@infrastructure/config/errors';
 
 export interface GetFollowingUseCaseInput {
   userId: string;

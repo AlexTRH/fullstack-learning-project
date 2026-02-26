@@ -6,8 +6,13 @@ import {
   Logger,
   HttpException,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { AppError } from '../../infrastructure/config/errors';
+import { AppError } from '@infrastructure/config/errors';
+
+/** Minimal response shape so we don't depend on Express (Nest's default adapter is Express) */
+interface HttpResponse {
+  status(code: number): HttpResponse;
+  json(body: unknown): void;
+}
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,7 +20,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const res = ctx.getResponse<Response>();
+    const res = ctx.getResponse<HttpResponse>();
 
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
@@ -40,9 +45,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.error(exception.message, exception.stack);
     }
 
-    res.status(statusCode).json({
-      success: false,
-      message,
-    });
+    res.status(statusCode).json({ success: false, message });
   }
 }

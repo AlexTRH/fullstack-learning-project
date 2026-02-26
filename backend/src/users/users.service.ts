@@ -2,19 +2,18 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   USER_REPOSITORY,
   FOLLOW_REPOSITORY,
-} from '../infrastructure/infrastructure.module';
-import type { UserRepository } from '../domain/interfaces/UserRepository';
-import type { FollowRepository } from '../domain/interfaces/FollowRepository';
-import { getMeUseCase } from '../application/use-cases/users/GetMeUseCase';
-import { getUserByIdUseCase } from '../application/use-cases/users/GetUserByIdUseCase';
-import { listUsersUseCase } from '../application/use-cases/users/ListUsersUseCase';
-import { updateUserUseCase } from '../application/use-cases/users/UpdateUserUseCase';
-import { getFollowersUseCase } from '../application/use-cases/follows/GetFollowersUseCase';
-import { getFollowingUseCase } from '../application/use-cases/follows/GetFollowingUseCase';
-import { followUserUseCase } from '../application/use-cases/follows/FollowUserUseCase';
-import { unfollowUserUseCase } from '../application/use-cases/follows/UnfollowUserUseCase';
-import type { User, UserPublicData, UserWithCounts } from '../domain/entities/User';
-import type { UpdateUserData } from '../domain/entities/User';
+} from '@infrastructure/infrastructure.module';
+import type { UserRepository } from '@domain/interfaces/UserRepository';
+import type { FollowRepository } from '@domain/interfaces/FollowRepository';
+import { getMeUseCase } from '@application/use-cases/users/GetMeUseCase';
+import { getUserByIdUseCase } from '@application/use-cases/users/GetUserByIdUseCase';
+import { listUsersUseCase } from '@application/use-cases/users/ListUsersUseCase';
+import { updateUserUseCase } from '@application/use-cases/users/UpdateUserUseCase';
+import { getFollowersUseCase } from '@application/use-cases/follows/GetFollowersUseCase';
+import { getFollowingUseCase } from '@application/use-cases/follows/GetFollowingUseCase';
+import { followUserUseCase } from '@application/use-cases/follows/FollowUserUseCase';
+import { unfollowUserUseCase } from '@application/use-cases/follows/UnfollowUserUseCase';
+import type { User, UserPublicData, UserWithCounts, UpdateUserData } from '@domain/entities/User';
 
 @Injectable()
 export class UsersService {

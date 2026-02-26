@@ -36,6 +36,11 @@ export function UserProfileCard({ user, onFollowersClick, onFollowingClick }: Us
     onSuccess: (data) => {
       setIsFollowing(data.isFollowing);
       queryClient.invalidateQueries({ queryKey: ["user", user.id] });
+      // Refresh current user's profile (dashboard "following" count)
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      if (currentUserId) {
+        queryClient.invalidateQueries({ queryKey: ["user", currentUserId] });
+      }
     },
   });
 

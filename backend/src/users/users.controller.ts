@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { ZodValidationPipe } from '@common/pipes/zod-validation.pipe';
 import { updateUserSchema, listUsersQuerySchema } from './schemas/user.schemas';
 
 @ApiTags('Users')

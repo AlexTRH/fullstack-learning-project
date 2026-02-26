@@ -3,7 +3,7 @@
  * Defines the contract for user data access
  */
 
-import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '../entities/User';
+import { CreateUserData, UpdateUserData, User, UserPublicData, UserWithCounts } from '@domain/entities/User';
 
 export interface UserWithPassword extends User {
   password: string;
