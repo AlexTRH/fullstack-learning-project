@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/field";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import type { CreatePostInput } from "../api";
 
 const textareaClasses =
@@ -85,7 +86,14 @@ export function CreatePostForm({
             </FieldContent>
           </Field>
           <Button type="submit" className="mt-3" disabled={isSubmitting}>
-            {isSubmitting ? "Posting…" : "Post"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Posting…
+              </>
+            ) : (
+              "Post"
+            )}
           </Button>
         </form>
       </CardContent>

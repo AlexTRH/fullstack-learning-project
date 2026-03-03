@@ -9,6 +9,7 @@ import { ProfileCardLoading } from "@/features/profile/components/ProfileCardLoa
 import { UserListItem } from "@/features/profile/components/UserListItem";
 import { fetchPosts, deletePost } from "@/features/posts/api";
 import { PostCard } from "@/features/posts/components/PostCard";
+import { PostCardSkeleton } from "@/features/posts/components/PostCardSkeleton";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -156,7 +157,13 @@ export default function Dashboard() {
                   </Button>
                 </div>
                 {!myPostsData ? (
-                  <p className="text-sm text-muted-foreground">Loading…</p>
+                  <ul className="space-y-4">
+                    {[1, 2].map((i) => (
+                      <li key={i}>
+                        <PostCardSkeleton />
+                      </li>
+                    ))}
+                  </ul>
                 ) : myPostsData.posts.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     No posts yet. Create one in the Feed.
