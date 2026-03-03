@@ -1,4 +1,4 @@
-# Контекст чата: посты и ветки (январь 2026)
+# Контекст чата: посты, дизайн, настройки (февраль 2026)
 
 Документ для продолжения работы в другом чате.
 
@@ -6,62 +6,71 @@
 
 ## Текущее состояние репозитория
 
-- **Активная ветка:** `feature/posts-frontend` (создана от `development`).
-- **Цель ветки:** реализация фронтенда для постов (работа с API постов на бэкенде).
+- **Активная ветка:** `feature/error-toasts` (создана от `development`). После мержа — переключиться на `development`.
+- Ветка `feature/posts-frontend` ранее смержена в `development`.
+- План работ: `docs/ROADMAP.md` (текущий фокус — ближайшие улучшения; тосты отмечены как сделанные).
 
 ---
 
-## Что сделано в этом чате
+## Что сделано
 
-1. **Проверка эндпоинтов постов**  
-   Все эндпоинты бэкенда работают:
-   - `GET /api/posts` — список (пагинация `page`, `limit`, фильтр `authorId`)
-   - `POST /api/posts` — создание (auth, тело `{ content }`)
-   - `GET /api/posts/:id` — один пост
-   - `PATCH /api/posts/:id` — обновление (только автор)
-   - `DELETE /api/posts/:id` — мягкое удаление (только автор)
+### Посты (фронт)
+- **Лента:** `/posts` — список постов, пагинация, форма создания (для авторизованных), удаление.
+- **Пост:** `/posts/[id]` — просмотр, кнопки Edit/Delete для автора.
+- **Редактирование:** `/posts/[id]/edit` — только автор.
+- API и типы: `frontend/features/posts/api.ts`; компоненты в `frontend/features/posts/components/`.
+- В сайдбаре пункт **Feed** → `/posts`.
 
-2. **Скрипт проверки API**  
-   - Файл: `backend/scripts/test-posts-api.mjs`  
-   - Запуск: из корня проекта или из `backend/`:
-     ```bash
-     API_URL=http://localhost:5001 TEST_EMAIL=alex@example.com TEST_PASSWORD=Password1 node backend/scripts/test-posts-api.mjs
-     ```
-   - Бэкенд может слушать порт 5001 (зависит от `PORT` в `.env`). Если не 5000 — задать `API_URL`.
+### Профиль и дашборд
+- **Dashboard** = полный «мой профиль»: карточка профиля, кликабельные Followers/Following (раскрываются списки), блок «My posts» с превью постов и ссылкой на ленту.
+- Заход на `/users/[мой-id]` редиректит на `/dashboard`.
+- Ссылка «Public profile» убрана из ProfileCard.
 
-3. **Git**  
-   - Подтянуты изменения из `origin`, переключение на `development`, `git pull`.  
-   - От `development` создана ветка `feature/posts-frontend`, в ней сейчас ведётся работа.
+### Исправления
+- **Счётчики followers/following:** в Prisma имена связей перепутаны; в репозиториях (User, Follow, Post) добавлен маппинг: API возвращает `followers` = кто подписан на меня, `following` = на кого подписан я.
+- **Список «Following»:** при открытии на своей странице у всех пунктов корректно показывается «Unfollow» (проп `initialIsFollowing` в `UserListItem`).
+
+### Тема и настройки
+- **Тема:** светлая / тёмная / системная. Сохранение в `localStorage` (ключ `app-theme`), без мигания при загрузке (инлайн-скрипт в `layout`).
+- **Настройки:** `Dashboard → Profile settings` (`/dashboard/settings`) — блок «Appearance» (ThemeSwitcher) + форма редактирования профиля.
+- Store: `frontend/stores/useThemeStore.ts`; провайдер: `frontend/components/theme-provider.tsx`.
+
+### Дизайн (Facebook-style)
+- Единый источник правды: `frontend/app/globals.css` — палитра (#1877F2, #F0F2F5, #050505, #65676B), без видимых границ (--border прозрачный).
+- Карточки без рамки, тень `shadow-card`; шапка с `bg-header` (белая в светлой теме).
+- Конфиг: `frontend/tailwind.config.ts` (header, shadow-card).
+
+### Обработка ошибок API (тосты)
+- **Sonner:** зависимость `sonner`, компонент `<Toaster richColors position="bottom-right" />` в `frontend/app/providers.tsx`.
+- **Глобальный interceptor:** в `frontend/lib/api.ts` при любой ошибке ответа (кроме 401 с refresh) показывается `toast.error(message)`. Сообщение: `response.data.message` или `error.message`, иначе «Something went wrong».
+- Ошибки создания/редактирования/удаления поста и загрузки ленты показываются тостом без доп. кода в компонентах.
 
 ---
 
 ## Бэкенд (посты) — кратко
 
-- **Стек:** NestJS, Prisma, JWT.  
-- **Роуты постов:** под префиксом `/api/posts` (см. выше).  
-- **Авторизация:** `POST /api/auth/login` возвращает `201` и в теле `data.accessToken`, `data.user` (в т.ч. `user.id` для фильтра `authorId`).  
-- Тестовые данные для входа: см. `CREDENTIALS.md` (например, `alex@example.com` / `Password1`).
+- **Роуты:** `GET/POST /api/posts`, `GET/PATCH/DELETE /api/posts/:id`. Валидация в `backend/src/posts/schemas/post.schemas.ts`.
+- **Авторизация:** JWT; тестовый пользователь — см. `CREDENTIALS.md`.
+- Скрипт проверки API: `backend/scripts/test-posts-api.mjs` (задать `API_URL`, `TEST_EMAIL`, `TEST_PASSWORD`).
 
 ---
 
-## Что делать дальше (фронт постов)
-
-- Реализовать на фронте работу с постами: список, создание, просмотр, редактирование, удаление (по возможности в том же стиле, что и остальное приложение).  
-- API уже готов; при необходимости смотреть контракты в `backend/src/posts/` (controller, schemas).
-
----
-
-## Полезные пути в проекте
+## Полезные пути
 
 | Назначение | Путь |
 |------------|------|
 | API постов (бэкенд) | `backend/src/posts/` |
-| Схемы/валидация постов | `backend/src/posts/schemas/post.schemas.ts` |
-| Доменная сущность поста | `backend/src/domain/entities/Post.ts` |
-| Скрипт проверки постов | `backend/scripts/test-posts-api.mjs` |
+| Домен поста | `backend/src/domain/entities/Post.ts` |
+| Маппинг счётчиков followers/following | `backend/src/infrastructure/database/PrismaUserRepository.ts` (mapUserWithCounts), `PrismaFollowRepository.ts`, `PrismaPostRepository.ts` |
+| Посты на фронте | `frontend/features/posts/` (api, components, utils) |
+| Страницы постов | `frontend/app/posts/`, `frontend/app/posts/[id]/`, `frontend/app/posts/[id]/edit/` |
+| Тема | `frontend/stores/useThemeStore.ts`, `frontend/components/theme-provider.tsx` |
+| Настройки (внешний вид) | `frontend/features/settings/components/ThemeSwitcher.tsx` |
+| Дизайн-токены | `frontend/app/globals.css` |
+| Тосты (API-ошибки) | `frontend/lib/api.ts` (interceptor), `frontend/app/providers.tsx` (Toaster) |
+| План работ | `docs/ROADMAP.md` |
 | Тестовые учётные данные | `CREDENTIALS.md` |
-| Фронт (Next.js и т.д.) | `frontend/` — структура фич/страниц по аналогии с профилем и т.д. |
 
 ---
 
-*Документ создан для передачи контекста между чатами. При необходимости обнови или дополни.*
+*Документ обновлён для передачи контекста между чатами.*

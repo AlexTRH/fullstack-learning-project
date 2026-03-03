@@ -1,4 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
+import { toast } from "sonner";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface InternalAxiosRequestWithRetry extends InternalAxiosRequestConfig {
@@ -67,6 +68,11 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
     }
+    const message =
+      (error.response?.data as { message?: string } | undefined)?.message ??
+      error.message ??
+      "Something went wrong";
+    toast.error(message);
     return Promise.reject(error);
   }
 );
