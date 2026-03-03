@@ -9,6 +9,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import type { UpdatePostInput } from "../api";
 
 const textareaClasses =
@@ -83,7 +84,14 @@ export function EditPostForm({
       </Field>
       <div className="flex gap-2 mt-3">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving…" : "Save"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            "Save"
+          )}
         </Button>
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>

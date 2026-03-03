@@ -12,7 +12,7 @@ import type { PostWithAuthor } from "../api";
 import { formatPostDate } from "../utils";
 import { getInitials } from "@/features/profile/utils";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { Pencil, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 type PostDetailCardProps = {
   post: PostWithAuthor;
@@ -97,8 +97,17 @@ export function PostDetailCard({
               onClick={() => onDelete(post.id)}
               disabled={isDeleting}
             >
-              <Trash2 className="size-4" />
-              Delete
+              {isDeleting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-4" />
+                  Delete
+                </>
+              )}
             </Button>
           )}
         </CardFooter>

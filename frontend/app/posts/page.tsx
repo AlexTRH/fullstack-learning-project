@@ -8,6 +8,7 @@ import {
   deletePost,
 } from "@/features/posts/api";
 import { PostCard } from "@/features/posts/components/PostCard";
+import { PostCardSkeleton } from "@/features/posts/components/PostCardSkeleton";
 import { CreatePostForm } from "@/features/posts/components/CreatePostForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,11 +53,13 @@ export default function PostsFeedPage() {
         )}
 
         {isLoading && (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <p className="text-muted-foreground text-sm">Loading posts…</p>
-            </CardContent>
-          </Card>
+          <ul className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <li key={i}>
+                <PostCardSkeleton />
+              </li>
+            ))}
+          </ul>
         )}
 
         {isError && (

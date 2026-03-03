@@ -8,6 +8,7 @@ import {
   deletePost,
 } from "@/features/posts/api";
 import { PostDetailCard } from "@/features/posts/components/PostDetailCard";
+import { PostCardSkeleton } from "@/features/posts/components/PostCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
@@ -42,13 +43,7 @@ export default function PostDetailPage({ params }: Props) {
           </Button>
         </div>
 
-        {isLoading && (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <p className="text-muted-foreground text-sm">Loading…</p>
-            </CardContent>
-          </Card>
-        )}
+        {isLoading && <PostCardSkeleton />}
 
         {isError && (
           <Card>
