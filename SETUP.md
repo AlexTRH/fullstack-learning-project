@@ -109,11 +109,11 @@ ISR уже настроен в Next.js. Пример использования:
 ```
 backend/
   src/
-    controllers/    # Контроллеры для обработки запросов
-    routes/         # API роуты
-    middleware/     # Express middleware
-    utils/          # Утилиты
-    server.ts       # Точка входа
+    auth/           # Модуль аутентификации (NestJS)
+    users/          # Модуль пользователей
+    prisma/         # PrismaService
+    common/         # guards, filters, decorators
+    main.ts         # Точка входа
 
 frontend/
   app/              # Next.js App Router
